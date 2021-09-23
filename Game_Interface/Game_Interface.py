@@ -27,26 +27,26 @@ def GameEnd():
 def Game():
     global attempts
     attempts+=1
-    hit=0
     blow=0
+    hit=0
     choice = input("0~fを5桁入力してください： ")
     guess = []
     for i in range(5):
         guess.append(choice[i])
     for i in range(5):
         if guess[i] == number[i]:
-            blow+=1
+            hit+=1
         for j in range(5):
             if(guess[i]==number[j]):
-                hit+=1
+                blow+=1
     
     #check if game won
-    if(blow==5):
+    if(hit==5):
         GameEnd()
     
     #print result
     else:
-        print("推測: ",choice,", HIT: ", hit, ", BLOW: ",blow," , attempts: ", attempts)
+        print("推測: ",choice,", HIT: ", blow, ", BLOW: ",hit," , attempts: ", attempts)
 
 #Functions
 GenerateNum()
