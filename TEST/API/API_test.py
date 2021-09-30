@@ -7,7 +7,10 @@ session = requests.Session()
 ##対戦部屋の情報の取得
 room_id =5002
 url_get_room = url + "/rooms/" + str(room_id)
+url_get_topics = url_get_room + "/topics"
 result = session.get(url_get_room)
+topics = requests.get(url_get_topics)
+print(topics)
 print(result.status_code)
 print(result.json())
 
@@ -21,3 +24,5 @@ post_data ={
 result_post = session.post(url_enter_room,headers=headers,json=post_data)
 print(result_post.status_code)
 print(result_post.json)
+
+##Topicの作成
