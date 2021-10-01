@@ -1,12 +1,36 @@
+
 #coding: UTF-8
-from mypj import number_guess
-from mypj import mypj
+"""
+    *File name: mypj_t.py
+    *Description:引数解析パーサー
+    *Created on: Oct 1st,2021
+    *Created by: JIAHUI LIU
+"""
+import argparse
+from . import number_guess
+
+
+def get_parser() ->argparse.Namespace:
+    """コマンドライン引数を解析したものをもつ
+
+    :rtype:argparse.Namespace
+    :return: コマンド値
+    """
+    parser=argparse.ArgumentParser(description='数当てゲーム')
+    parser.add_argument('--min_ans',default=0)
+    parser.add_argument('--max_ans',  default=99)
+    parser.add_argument('--max_stage', default=10)
+    parser.add_argument("--ans")
+    parser.add_argument('--mode', default="manual")
+    args=parser.parse_args()
+    return args
+
 def main() ->None:
     """数当てゲームのメイン
     :rtype:None
     :return: なし
     """
-    args=mypj.get_parser()
+    args=get_parser()
     min_ans = int(args.min_ans)
     max_ans = int(args.max_ans)
     max_stage = int(args.max_stage)
