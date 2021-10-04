@@ -2,6 +2,7 @@
 import json
 import requests
 url = "https://damp-earth-70561.herokuapp.com"
+# save cookies for post_data for first request
 session = requests.Session()
 
 ##対戦部屋の情報の取得
