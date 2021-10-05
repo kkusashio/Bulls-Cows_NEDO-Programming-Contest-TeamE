@@ -13,15 +13,15 @@ import collection
 headers = {"Content-Type":"application/json"}
 his_url2 = url_enter_selected_room + "/players/" + user_name2 + "/table"
 his_post2 = session.get(his_url2)
-print(his_post2.status_code)
-print(his_post2.json())
+#print(his_post2.status_code)
+#print(his_post2.json())
 
-dict=his_post1.json()
+dict=his_post2.json()
 
-print('room_id: ', his_post1.json().get('room_id'))
-print('state: ', his_post1.json().get('state'))
-print('now_player: ', his_post1.json().get('now_player'))
-print('table: ', his_post1.json().get('table'))
-print('opponent_table: ', his_post1.json().get('opponent_table'))
-print('winner: ', his_post1.json().get('winner'))
-print('game_end_count: ', his_post1.json().get('game_end_count'))
+print('room_id: ', his_post2.json().get('room_id'))
+print('state: ', his_post2.json().get('state'))
+print('now_player: ', his_post2.json().get('now_player'))
+print('table: ', his_post2.json().get('table'))
+print('opponent_table: ', his_post2.json().get('opponent_table'))
+print('winner: ', his_post2.json().get('winner'))
+print('game_end_count: ', his_post2.json().get('game_end_count'))
