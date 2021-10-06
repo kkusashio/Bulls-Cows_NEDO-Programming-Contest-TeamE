@@ -10,3 +10,5 @@ url_get_room = url + "/rooms"
 result = session.get(url_enter_selected_room)
 print(result.status_code)
 print(result.json())
+
+
