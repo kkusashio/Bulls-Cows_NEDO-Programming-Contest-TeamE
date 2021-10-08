@@ -6,7 +6,7 @@ CUIのみで良い→余力があればGUI
 """
 import random
 
-number = []
+ans = []
 numberchoice = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 numberchoices = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 attempts = 0
@@ -17,11 +17,22 @@ def GenerateNum():
         x = random.randrange(0,16-i) # select random number between 0~16
         y = numberchoice[x]
         del numberchoice[x] #delete number used to prevent overlap
-        number.append(y) # add elements to the list
-    print(number)
+        ans.append(y) # add elements to the list
+    print(ans)
+
+def Hit_Blow_detector(answer,guess):
+    hits = 0
+    blows = 0
+    for i in guess:
+        if i in answer:
+            if(guess.index(i) == answer.index(i)):
+                hits += 1
+            else:
+                blows += 1
+    return [hits,blows]
 
 def TestFunc():
-    print ("Answer is", number)
+    print ("Answer is", ans)
 
 def GameEnd():
     print("GAME WON", " Attempts: ", attempts)
@@ -61,10 +72,10 @@ def Game():
     for i in range(5):
         guess.append(choice[i])
     for i in range(5):
-        if guess[i] == number[i]:
+        if guess[i] == ans[i]:
             hit+=1
         for j in range(5):
-            if(guess[i]==number[j]):
+            if(guess[i]==ans[j]):
                 blow+=1
     
     #check if game won
