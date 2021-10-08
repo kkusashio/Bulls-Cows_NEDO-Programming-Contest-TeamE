@@ -37,6 +37,8 @@ guess_data1 ={
 }
 print(guess)
 guess_post1 = session.post(guess_url,headers=headers,json=guess_data1)
+ds = guess_post1.json()
 print(guess_post1.status_code)
 print(guess_post1.json())
+print(ds['now_player'])
 
