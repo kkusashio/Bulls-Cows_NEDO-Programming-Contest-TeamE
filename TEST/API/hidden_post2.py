@@ -11,7 +11,7 @@ import collection
 
 ##ユーザー1のsecretを登録
 headers = {"Content-Type":"application/json"}
-secret_url = url_enter_selected_room + "/players/" + user_name2 + "/hidden"
+hidden_url = url_enter_selected_room + "/players/" + user_name2 + "/hidden"
 secret_id ={
     "room_id": ROOM_ID,
     "player_name": user_name2
@@ -33,8 +33,9 @@ secret_data2 ={
 
 #ユーザー2のhidden登録の関数化
 def _secret_generation2()->None:
-    hidden_post2=session.post(secret_url,headers=headers,json=secret_data2)
+    hidden_post2=session.post(hidden_url,headers=headers,json=secret_data2)
     hidden_post_check2=json.loads(hidden_post2.text)
+    print(hidden_post_check2)
     if hidden_post2.status_code==200:
         if hidden_post_check2['selecting'] == 'True':
             print("game start after player 2 prepared for secret number,you are player1")
