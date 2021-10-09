@@ -77,12 +77,17 @@ class game_prepare:
 
     def run(self) ->Tuple[List[int],List[int],List[int]]:
         self._start_game_auto()
-        while self.hit_num != 5:
+        while True:
             self._play_contine()
+            if self._winner() == 1:
+                print("winner generated")
+                break
+            else:
             # time.sleep(10)
-            return self.history
+                return self.history
             
-        print("winner generated")
+            
+        
 
     # def run(self,mode) ->Tuple[int,Tuple[List[int],List[int],List[int]]]:
     #     """数当てゲームを実行するランナー
@@ -103,23 +108,24 @@ class game_prepare:
     def _play_contine(self) -> None:
         time.sleep(1)
         timer.cancel()
-        self._guess_gene()
-        self._get_history()
-        if self.turn == 1:
-            time.sleep(10)
-            self._self_opponent_guess_check()
-            
-            
-        else:
-            if self.pre_h == 1 and self.pre_E == -1:
-                time.sleep(10)
-                timer.cancel()
-                self._guess_gene()
-                self._get_history()
-                
-            else:
+        while self.hit_num <5:
+            self._guess_gene()
+            self._get_history()
+            if self.turn == 1:
                 time.sleep(5)
                 self._self_opponent_guess_check()
+                
+                
+            else:
+                if self.pre_h == 1 and self.pre_E == -1:
+                    # time.sleep(10)
+                    # timer.cancel()
+                    self._guess_gene()
+                    self._get_history()
+                    
+                else:
+                    time.sleep(5)
+                    self._self_opponent_guess_check()
             
 
 
@@ -224,6 +230,13 @@ class game_prepare:
             print("E")
 
 
+    def _winner(self) ->None:
+        his_url = HISTORY_URL
+        his_info = session.get(his_url)
+        if his_info.json()['winner'] is not None:
+            return 1
+        else:
+            return 0
 
 
     def _pre_room(self,room_id:int = ROOM_ID) -> int:
@@ -336,6 +349,7 @@ class game_prepare:
     def _guess_gene(self) ->None:
         guess_url = GUESS_URL
         headers = {"Content-Type":"application/json"}
+        # while self.hit_num <5:
         guess = random.sample(numberchoice,5)
         self.guess = "".join(guess)
         guess_data1 ={

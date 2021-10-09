@@ -78,11 +78,16 @@ class game_prepare:
 
     def run(self) ->Tuple[List[int],List[int],List[int]]:
         self._start_game_auto()
-        while self.hit_num != 5:
+        while True:
             self._play_contine()
+            if self._winner() == 1:
+                print("winner generated")
+                break
+                
+            else:
             # time.sleep(10)
-            return self.history
-        print("winner generated")
+                return self.history
+        
 
     # def run(self,mode) ->Tuple[int,Tuple[List[int],List[int],List[int]]]:
     #     """数当てゲームを実行するランナー
@@ -101,25 +106,27 @@ class game_prepare:
     #     return self._get_history()
     
     def _play_contine(self) -> None:
+        # while True:
         time.sleep(1)
         timer.cancel()
-        self._guess_gene()
-        self._get_history()
-        if self.turn == 1:
-            time.sleep(5)
-            self._self_opponent_guess_check()
-            
-            
-        else:
-            
-            if self.pre_h == 1 and self.pre_E2 == -1:
-                time.sleep(10)
-                timer.cancel()
-                self._guess_gene()
-                self._get_history()
-            else:
+        while self.hit_num <5:
+            self._guess_gene()
+            self._get_history()
+            if self.turn == 1:
                 time.sleep(5)
                 self._self_opponent_guess_check()
+                
+                
+            else:
+                
+                if self.pre_h == 1 and self.pre_E2 == -1:
+                    # time.sleep(10)
+                    # timer.cancel()
+                    self._guess_gene()
+                    self._get_history()
+                else:
+                    time.sleep(5)
+                    self._self_opponent_guess_check()
             
 
 
@@ -213,7 +220,7 @@ class game_prepare:
         }
         check_guess_info1 = session.post(check_guess_url,headers=headers,json=guess_data1)
         check_guess_info2 = json.loads(check_guess_info1.text)
-        print(check_guess_info2)
+        # print(check_guess_info2)
         if check_guess_info1.status_code == 400 and check_guess_info1.json()["detail"] == 'opponent turn':
                 self.pre_E2 = -1
             
@@ -222,7 +229,13 @@ class game_prepare:
         else:
             print("E2")
 
-
+    def _winner(self) ->None:
+        his_url = HISTORY_URL
+        his_info = session.get(his_url)
+        if his_info.json()['winner'] is not None:
+            return 1
+        else:
+            return 0
 
 
 
@@ -322,7 +335,7 @@ class game_prepare:
                 print("Failed generate secret, please try again")
         elif  hidden_post.status_code == 400:
             if hidden_gene_info['detail'] == 'you can not select hidden':
-                self.hid = 2
+                self.hid = 1
                 print("Room {} :Secret already generated".format(ROOM_ID))
                 
             else:
@@ -335,10 +348,11 @@ class game_prepare:
     def _guess_gene(self) ->None:
         guess_url = GUESS_URL
         headers = {"Content-Type":"application/json"}
+        # while self.hit_num <5:
         guess = random.sample(numberchoice,5)
         self.guess = "".join(guess)
         guess_data1 ={
-            "player_id": USER1_ID,
+            "player_id": USER2_ID,
             "guess": self.guess #args.ans
         }
         guess_post1 = session.post(guess_url,headers=headers,json=guess_data1)
