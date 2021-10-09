@@ -6,8 +6,8 @@ from get_room import room_id, session
 from get_room import url_get_room, url_enter_selected_room
 from player_enter1 import user_id1,user_name1
 from player_enter2 import user_id2, user_name2
-import Guess
-import collection
+# import Guess
+# import collection
 
 ##ユーザー1の推測数字を登録
 headers = {"Content-Type":"application/json"}
@@ -17,11 +17,12 @@ his_post2 = session.get(his_url2)
 #print(his_post2.json())
 
 dict=his_post2.json()
+print(dict)
 
-print('room_id: ', his_post2.json().get('room_id'))
-print('state: ', his_post2.json().get('state'))
-print('now_player: ', his_post2.json().get('now_player'))
-print('table: ', his_post2.json().get('table'))
-print('opponent_table: ', his_post2.json().get('opponent_table'))
-print('winner: ', his_post2.json().get('winner'))
-print('game_end_count: ', his_post2.json().get('game_end_count'))
+# print('room_id: ', his_post2.json().get('room_id'))
+# print('state: ', his_post2.json().get('state'))
+# print('now_player: ', his_post2.json().get('now_player'))
+# print('table: ', his_post2.json().get('table'))
+# print('opponent_table: ', his_post2.json().get('opponent_table'))
+# print('winner: ', his_post2.json().get('winner'))
+# print('game_end_count: ', his_post2.json().get('game_end_count'))
