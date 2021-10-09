@@ -1,7 +1,7 @@
 import random
 import math
 
-def count_BullsCows(answer,guess):
+def HBidentify(answer,guess):
     hits = 0
     blows = 0
     for i in guess:
@@ -21,10 +21,8 @@ total_perms = math.factorial(16)/math.factorial(16-5)
 #総数
 
 while(True):
-    
     tries += 1
     print("tries: ",tries)
-    
     done = []
     while(len(done) != total_perms):
         while(True):
@@ -36,7 +34,7 @@ while(True):
                 break
         if(tries>1):
             for j in range(tries-1):
-                h,b = count_BullsCows(guess,guessed_numbers[j])
+                h,b = HBidentify(guess,guessed_numbers[j])
                 if(h != hits[j] or b != blows[j]):#もう同じ組み合わせがあるかどうか
                     break
             else:
@@ -60,5 +58,5 @@ while(True):
             break
     
     if(h == 5):
-        print("I won in %d chances" % tries)
+        print("finnish",tries)
         break
