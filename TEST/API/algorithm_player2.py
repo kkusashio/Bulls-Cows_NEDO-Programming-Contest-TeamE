@@ -4,7 +4,7 @@ import random
 import math
 
 digits=5 #桁数
-numbers=10 #選択肢
+numbers=16 #選択肢
 tries = 0 #トライ数
 hits = [] 
 blows = []
@@ -25,8 +25,8 @@ def HBidentify(answer,guess): #HBの計算
     return [hits,blows]
 
 def get_random(): #ランダムで桁数の数字を出力
-    #guess = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
-    guess = ['0','1','2','3','4','5','6','7','8','9']
+    guess = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
+    #guess = ['0','1','2','3','4','5','6','7','8','9']#10進数の場合
     random.shuffle(guess)
     guess = guess[:digits]
     return guess

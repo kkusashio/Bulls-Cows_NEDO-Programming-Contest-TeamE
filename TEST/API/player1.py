@@ -9,6 +9,7 @@ import time
 import threading
 
 import argparse
+import algorithm_player1
 
 
 numberchoice = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
@@ -350,7 +351,8 @@ class game_prepare:
         guess_url = GUESS_URL
         headers = {"Content-Type":"application/json"}
         # while self.hit_num <5:
-        guess = random.sample(numberchoice,5)
+        #guess = random.sample(numberchoice,5)
+        guess = algorithm_player1.algorithm_main()
         self.guess = "".join(guess)
         guess_data1 ={
             "player_id": USER1_ID,
@@ -375,7 +377,7 @@ class game_prepare:
             print("Generate guess failed, please try again")
 
 
-    def _get_history(self) -> Tuple[int,Tuple[List[int],List[int],List[int]]]: 
+    def _get_history(self) -> Tuple[int,Tuple[List[int],List[int],List[int]]]:
         his_url = HISTORY_URL
         his_info = session.get(his_url)
         # his_get = his_info.json()
