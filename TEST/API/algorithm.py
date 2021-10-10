@@ -79,10 +79,12 @@ def detect_algorithm():#実際のアルゴリズム
             print("finnish",tries)
             break
 
+
+player1.game_prepare._get_history
+
+
 ans=gen_answer()
 detect_algorithm()
-
-
 
 '''
 =possibilities=
