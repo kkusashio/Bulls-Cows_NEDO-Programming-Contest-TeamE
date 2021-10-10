@@ -26,7 +26,7 @@ secret_data1 ={
     "player_id": user_id1,
     "hidden_number": secret #args.ans
 }
-# print(secret)
+print(secret)
 # secret_post1 = session.post(secret_url,headers=headers,json=secret_data1)
 # get_hidden_info =session.get(secret_url)
 # print(get_hidden_info.text)
