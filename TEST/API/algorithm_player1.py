@@ -10,9 +10,8 @@ done: guess_post1→相手がhidden postをしたかどうかを確認→仕様
 done: guess_post2→(opponent)
 """
 
-
-import player1 #[[12aef,1,2],[54313,2,2],
-import player2
+import player1
+# from player1 import game_prepare #[[12aef,1,2],[54313,2,2],
 import random
 import math
 
@@ -27,13 +26,15 @@ ans=[] #正解
 guess=[] #そのトライでの予測
 
 def get_HB():
-    HB=player1.game_prepare._get_history #[[1,[12345,1,0]],[2,[adf23,0,3]],[3,[...]]] 3次元配列
+    args = player1.get_parser()
+    HB=args.hit_number #[[1,[12345,1,0]],[2,[adf23,0,3]],[3,[...]]] 3次元配列
     H=HB[-1][1][1]
     print("getH: ",H)
     B=HB[-1][1][2]
     print("getB: ",B)
     tries=[-1][0]
     return([H,B])
+# get_HB()
 
 def HBidentify(answer,guess): #HBの計算
     hits = 0
@@ -86,6 +87,7 @@ def detect_algorithm():#実際のアルゴリズム
             break
         print("checked",len(done))
         print("guess: ",guess)
+        
         while(True):
             #h,b=HBidentify(ans,guess)
             h,b=get_HB()
@@ -101,11 +103,12 @@ def detect_algorithm():#実際のアルゴリズム
         if(h == digits):
             print("finnish",tries)
             break
+        return guess
 
 
 def algorithm_main():#return値は[2,3,a,d,f]
     #ans=gen_answer()
-    return(detect_algorithm())
+    detect_algorithm()
 
 '''
 =possibilities=
