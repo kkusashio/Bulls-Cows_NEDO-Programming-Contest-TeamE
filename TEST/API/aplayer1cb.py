@@ -73,6 +73,7 @@ class game_prepare:
         self.ans=[] #正解
         self.guess_alg=[] #そのトライでの予測
         self.done = []
+        self.number_tries = 0
         
         self.g_history: List[int] = [00000]
         self.h_history: List[int] = [0]
@@ -377,15 +378,15 @@ class game_prepare:
 # get_HB()
 
     def _HBidentify(self,answer,guess): #HBの計算
-        self.hits = 0
-        self.blows = 0
+        hits = 0
+        blows = 0
         for i in guess:
             if i in answer:
                 if(guess.index(i) == answer.index(i)):
-                    self.hits += 1
+                    hits += 1
                 else:
-                    self.blows += 1
-        return [self.hits,self.blows]
+                    blows += 1
+        return [hits,blows]
 
     def _get_random(self): #ランダムで桁数の数字を出力
         guess = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
@@ -400,51 +401,50 @@ class game_prepare:
         return self.ans
 
     def _detect_algorithm(self):#実際のアルゴリズム
-        # self.tries=0
-        while(True):
-            self.tries += 1
-            print(self.tries)
-            #print("tries: ",tries)
-            # self.done = []
-            while(len(self.done) != self.total_possibilities):
-                while(True):
-                    self.guess_alg=self._get_random()
-                    if(self.guess_alg not in self.done):
-                        self.done.append(self.guess_alg)
+        self.tries = self.number_tries
+        
+        print("tries: ",self.tries)
+        #print("tries: ",tries)
+        # self.done = []
+        while(len(self.done) != self.total_possibilities):
+            while(True):
+                self.guess_alg=self._get_random()
+                if(self.guess_alg not in self.done):
+                    self.done.append(self.guess_alg)
+                    break
+            if(self.tries>2):
+                for j in range(self.tries-1):
+                    h,b = self._HBidentify(self.guess_alg,self.guessed_numbers[j])
+                    if(h != self.hits[j] or b != self.blows[j]):#もう同じ組み合わせがあるかどうか
                         break
-                if(self.tries>1):
-                    for j in range(self.tries-1):
-                        h,b = self._HBidentify(self.guess_alg,self.guessed_numbers[j])
-                        if(h != self.hits[j] or b != self.blows[j]):#もう同じ組み合わせがあるかどうか
-                            break
-                    else:
-                        self.guessed_numbers.append(self.guess_alg)
-                        break
-                else:#chance=0
+                else:
                     self.guessed_numbers.append(self.guess_alg)
                     break
-            else:
-                print("error")
+            else:#chance=0
+                self.guessed_numbers.append(self.guess_alg)
                 break
-            print("checked",len(self.done))
-            print("guess: ",self.guess_alg)
+        else:
+            print("error")
             
-            while(True):
-                #h,b=HBidentify(ans,guess)
-                h,b=self._get_HB()
-                print(h,"H",b,"B")
-                # print("Guessed numbers:",len(self.guessed_numbers))
-                #h = (int(input("Hits: ")))
-                #b = (int(input("Blows: ")))
-                if(h + b <= self.digits):
-                    self.hits.append(h)
-                    self.blows.append(b)
-                    print()
-                    break
-            
-            if(h == self.digits):
-                print("finnish",self.tries)
+        print("checked",len(self.done))
+        print("guess: ",self.guess_alg)
+        
+        while(True):
+            #h,b=HBidentify(ans,guess)
+            h,b=self._get_HB()
+            print(h,"H",b,"B")
+            # print("Guessed numbers:",len(self.guessed_numbers))
+            #h = (int(input("Hits: ")))
+            #b = (int(input("Blows: ")))
+            if(h + b <= self.digits):
+                self.hits.append(h)
+                self.blows.append(b)
+                print()
                 break
+        
+        if(h == self.digits):
+            print("finnish",self.tries)
+            
             
 
 
@@ -460,6 +460,7 @@ class game_prepare:
         headers = {"Content-Type":"application/json"}
         # while self.hit_num <5:
         #guess = random.sample(numberchoice,5)
+        self.number_tries+=1
         self._detect_algorithm()
         guess_al = self.guess_alg
         self.guess = "".join(guess_al)
