@@ -71,7 +71,8 @@ class game_prepare:
         self.guessed_numbers = [] #過去に予想したもの
         self.total_possibilities = math.factorial(self.numbers)/math.factorial(self.numbers-self.digits) #可能性の総数
         self.ans=[] #正解
-        self.guess=[] #そのトライでの予測
+        self.guess_alg=[] #そのトライでの予測
+        self.done = []
         
         self.g_history: List[int] = [00000]
         self.h_history: List[int] = [0]
@@ -82,7 +83,7 @@ class game_prepare:
         # self.b_history: List[int] = self.history[2]
         # self.history: Tuple[List[int],List[int],List[int]] = [[],[],[]]
         self.secret = 0
-        # self.guess = 0
+        self.guess = 0
 
         # if guess is not None:
         #     self.guess =guess
@@ -390,8 +391,8 @@ class game_prepare:
         guess = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
         #guess = ['0','1','2','3','4','5','6','7','8','9']#10進数の場合
         random.shuffle(guess)
-        self.guess = guess[:self.digits]
-        return self.guess
+        self.guess_alg = guess[:self.digits]
+        return self.guess_alg
 
     def _gen_answer(self):#正解のリストを生成
         self.ans = self._get_random()
@@ -404,29 +405,29 @@ class game_prepare:
             self.tries += 1
             print(self.tries)
             #print("tries: ",tries)
-            self.done = []
+            # self.done = []
             while(len(self.done) != self.total_possibilities):
                 while(True):
-                    self.guess=self._get_random()
-                    if(self.guess not in self.done):
-                        self.done.append(self.guess)
+                    self.guess_alg=self._get_random()
+                    if(self.guess_alg not in self.done):
+                        self.done.append(self.guess_alg)
                         break
                 if(self.tries>1):
                     for j in range(self.tries-1):
-                        h,b = self._HBidentify(self.guess,self.guessed_numbers[j])
+                        h,b = self._HBidentify(self.guess_alg,self.guessed_numbers[j])
                         if(h != self.hits[j] or b != self.blows[j]):#もう同じ組み合わせがあるかどうか
                             break
                     else:
-                        self.guessed_numbers.append(self.guess)
+                        self.guessed_numbers.append(self.guess_alg)
                         break
                 else:#chance=0
-                    self.guessed_numbers.append(self.guess)
+                    self.guessed_numbers.append(self.guess_alg)
                     break
             else:
                 print("error")
                 break
             print("checked",len(self.done))
-            print("guess: ",self.guess)
+            print("guess: ",self.guess_alg)
             
             while(True):
                 #h,b=HBidentify(ans,guess)
@@ -460,7 +461,7 @@ class game_prepare:
         # while self.hit_num <5:
         #guess = random.sample(numberchoice,5)
         self._detect_algorithm()
-        guess_al = self.guessed_numbers[-1]
+        guess_al = self.guess_alg
         self.guess = "".join(guess_al)
         guess_data1 ={
             "player_id": USER1_ID,
