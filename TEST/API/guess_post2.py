@@ -16,7 +16,7 @@ numberchoice_g2 = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','
 guess = random.sample(numberchoice_g2,5)
 guess = "".join(guess)
 guess_data1 ={
-    "player_id": user_id1,
+    "player_id": user_id2,
     "guess": guess #args.ans
 }
 print(guess)

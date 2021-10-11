@@ -1,0 +1,3 @@
+cd C:\Users\eliu\Dropbox\Fundamental_study\python\NEDO_TeamE\TEST\API
+python player1.py
+python player2.py
