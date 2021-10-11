@@ -1,5 +1,5 @@
-import player1
-import player2
+# import player1
+# import player2
 import random
 import math
 
@@ -80,7 +80,7 @@ def detect_algorithm():#実際のアルゴリズム
             break
 
 
-player1.game_prepare._get_history
+# player1.game_prepare._get_history
 
 
 ans=gen_answer()

@@ -73,12 +73,16 @@ class game_prepare:
         self.ans=[] #正解
         self.guess=[] #そのトライでの予測
         
-        self.g_history: List[int] = []
-        self.h_history: List[int] = []
-        self.b_history: List[int] = []
+        self.g_history: List[int] = [00000]
+        self.h_history: List[int] = [0]
+        self.b_history: List[int] = [0]
         self.history: Tuple[List[int],List[int],List[int]] = [self.g_history,self.h_history,self.b_history]
+        # self.g_history: List[int] = self.history[0]
+        # self.h_history: List[int] = self.history[1]
+        # self.b_history: List[int] = self.history[2]
+        # self.history: Tuple[List[int],List[int],List[int]] = [[],[],[]]
         self.secret = 0
-        self.guess = 0
+        # self.guess = 0
 
         # if guess is not None:
         #     self.guess =guess
@@ -86,8 +90,9 @@ class game_prepare:
         #     self.guess = self._define_answer()
 
     def run(self) ->Tuple[List[int],List[int],List[int]]:
-        self._get_history()
+        
         self._start_game_auto()
+        self._get_history()
         while True:
             self._play_contine()
             if self._winner() == 1:
@@ -361,10 +366,10 @@ class game_prepare:
     
     # HB=self.history() #[[1,[12345,1,0]],[2,[adf23,0,3]],[3,[...]]] 3次元配列
         hdx = len(self.history[1])
-        H = self.history[1][-1]
+        H = self.history[1][hdx-1]
         print("getH: ",H)
         bdx = len(self.history[2])
-        B = self.history[2][-1]
+        B = self.history[2][hdx-1]
         print("getB: ",B)
         self.tries=[-1][0]
         return([H,B])
@@ -394,9 +399,10 @@ class game_prepare:
         return self.ans
 
     def _detect_algorithm(self):#実際のアルゴリズム
-        self.tries=0
+        # self.tries=0
         while(True):
             self.tries += 1
+            print(self.tries)
             #print("tries: ",tries)
             self.done = []
             while(len(self.done) != self.total_possibilities):
@@ -426,6 +432,7 @@ class game_prepare:
                 #h,b=HBidentify(ans,guess)
                 h,b=self._get_HB()
                 print(h,"H",b,"B")
+                # print("Guessed numbers:",len(self.guessed_numbers))
                 #h = (int(input("Hits: ")))
                 #b = (int(input("Blows: ")))
                 if(h + b <= self.digits):
@@ -437,7 +444,7 @@ class game_prepare:
             if(h == self.digits):
                 print("finnish",self.tries)
                 break
-            return self.guess
+            
 
 
     # def algorithm_main():#return値は[2,3,a,d,f]
@@ -452,7 +459,8 @@ class game_prepare:
         headers = {"Content-Type":"application/json"}
         # while self.hit_num <5:
         #guess = random.sample(numberchoice,5)
-        guess_al = self._detect_algorithm()
+        self._detect_algorithm()
+        guess_al = self.guessed_numbers[-1]
         self.guess = "".join(guess_al)
         guess_data1 ={
             "player_id": USER1_ID,
