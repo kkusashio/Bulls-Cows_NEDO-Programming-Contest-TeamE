@@ -71,11 +71,12 @@ class game_prepare:
         self.guessed_numbers = [] #過去に予想したもの
         self.total_possibilities = math.factorial(self.numbers)/math.factorial(self.numbers-self.digits) #可能性の総数
         self.ans=[] #正解
-        self.guess=[] #そのトライでの予測
+        self.guess_alg=[] #そのトライでの予測
+        self.done = []
         
-        self.g_history: List[int] = []
-        self.h_history: List[int] = []
-        self.b_history: List[int] = []
+        self.g_history: List[int] = [00000]
+        self.h_history: List[int] = [0]
+        self.b_history: List[int] = [0]
         self.history: Tuple[List[int],List[int],List[int]] = [self.g_history,self.h_history,self.b_history]
         self.secret = 0
         self.guess = 0
@@ -86,7 +87,7 @@ class game_prepare:
         #     self.guess = self._define_answer()
 
     def run(self) ->Tuple[List[int],List[int],List[int]]:
-        self._get_history()
+        
         self._start_game_auto()
         while True:
             self._play_contine()
@@ -385,8 +386,8 @@ class game_prepare:
         guess = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
         #guess = ['0','1','2','3','4','5','6','7','8','9']#10進数の場合
         random.shuffle(guess)
-        self.guess = guess[:self.digits]
-        return self.guess
+        self.guess_alg = guess[:self.digits]
+        return self.guess_alg
 
     def _gen_answer(self):#正解のリストを生成
         self.ans = self._get_random()
@@ -394,38 +395,39 @@ class game_prepare:
         return self.ans
 
     def _detect_algorithm(self):#実際のアルゴリズム
-        self.tries=0
+        # self.tries=0
         while(True):
             self.tries += 1
-            #print("tries: ",tries)
-            self.done = []
+            print("tries: ",self.tries)
+            # self.done = []
             while(len(self.done) != self.total_possibilities):
                 while(True):
-                    self.guess=self._get_random()
-                    if(self.guess not in self.done):
-                        self.done.append(self.guess)
+                    self.guess_alg=self._get_random()
+                    if(self.guess_alg not in self.done):
+                        self.done.append(self.guess_alg)
                         break
                 if(self.tries>1):
                     for j in range(self.tries-1):
-                        h,b = self._HBidentify(self.guess,self.guessed_numbers[j])
+                        h,b = self._HBidentify(self.guess_alg,self.guessed_numbers[j])
                         if(h != self.hits[j] or b != self.blows[j]):#もう同じ組み合わせがあるかどうか
                             break
                     else:
-                        self.guessed_numbers.append(self.guess)
+                        self.guessed_numbers.append(self.guess_alg)
                         break
                 else:#chance=0
-                    self.guessed_numbers.append(self.guess)
+                    self.guessed_numbers.append(self.guess_alg)
                     break
             else:
                 print("error")
                 break
             print("checked",len(self.done))
-            print("guess: ",self.guess)
+            print("guess: ",self.guess_alg)
             
             while(True):
                 #h,b=HBidentify(ans,guess)
                 h,b=self._get_HB()
                 print(h,"H",b,"B")
+                # print("Guessed numbers:",len(self.guessed_numbers))
                 #h = (int(input("Hits: ")))
                 #b = (int(input("Blows: ")))
                 if(h + b <= self.digits):
@@ -437,7 +439,7 @@ class game_prepare:
             if(h == self.digits):
                 print("finnish",self.tries)
                 break
-            return self.guess
+            # return self.guess
 
 
     # def algorithm_main():#return値は[2,3,a,d,f]
@@ -452,7 +454,8 @@ class game_prepare:
         headers = {"Content-Type":"application/json"}
         # while self.hit_num <5:
         #guess = random.sample(numberchoice,5)
-        guess_al = self._detect_algorithm()
+        # self._detect_algorithm()
+        guess_al = self.guess_alg
         self.guess = "".join(guess_al)
         guess_data1 ={
             "player_id": USER2_ID,
