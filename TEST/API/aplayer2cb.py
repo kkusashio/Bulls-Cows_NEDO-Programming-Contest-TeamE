@@ -8,6 +8,7 @@ import requests
 from datetime import datetime
 import time
 import threading
+from aplayer1cb import ROOM_ID
 
 import argparse
 
@@ -22,7 +23,7 @@ USER1_ID = 'f30491d7-d862-4535-beab-077d682cb31f'
 USER2_NAME = 'E2'
 USER2_ID ='46711285-133d-40b6-93ae-e93d9404fb43'
 URL = "https://damp-earth-70561.herokuapp.com"
-ROOM_ID = 5008
+# ROOM_ID = 5009
 ROOM_URL = URL + "/rooms/" + str(ROOM_ID)
 ENTER_URL = URL + "/rooms"
 HIDDEN_URL = ROOM_URL + "/players/" + USER2_NAME + "/hidden"
@@ -125,7 +126,7 @@ class game_prepare:
             self._guess_gene()
             self._get_history()
             if self.turn == 1:
-                time.sleep(2)
+                time.sleep(5)
                 self._self_opponent_guess_check()
                 
                 
@@ -137,7 +138,7 @@ class game_prepare:
                     self._get_history()
                     
                 else:
-                    time.sleep(2)
+                    time.sleep(5)
                     self._self_opponent_guess_check()
             
 
@@ -241,6 +242,7 @@ class game_prepare:
                 self.pre_E = 1
         else:
             print("E")
+            print(check_guess_info1.json())
 
 
     def _winner(self) ->None:
@@ -363,10 +365,10 @@ class game_prepare:
     
     # HB=self.history() #[[1,[12345,1,0]],[2,[adf23,0,3]],[3,[...]]] 3次元配列
         hdx = len(self.history[1])
-        H = self.history[1][-1]
+        H = self.history[1][hdx-1]
         print("getH: ",H)
         bdx = len(self.history[2])
-        B = self.history[2][-1]
+        B = self.history[2][bdx-1]
         print("getB: ",B)
         self.tries=[-1][0]
         return([H,B])
@@ -399,7 +401,7 @@ class game_prepare:
         self.tries = self.number_tries
             
         print("tries: ",self.tries)
-        # self.done = []
+        self.done = []
         while(len(self.done) != self.total_possibilities):
             while(True):
                 self.guess_alg=self._get_random()

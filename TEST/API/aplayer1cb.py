@@ -22,7 +22,7 @@ USER1_ID = 'f30491d7-d862-4535-beab-077d682cb31f'
 USER2_NAME = 'E2'
 USER2_ID ='46711285-133d-40b6-93ae-e93d9404fb43'
 URL = "https://damp-earth-70561.herokuapp.com"
-ROOM_ID = 5008
+ROOM_ID = 5009
 ROOM_URL = URL + "/rooms/" + str(ROOM_ID)
 ENTER_URL = URL + "/rooms"
 HIDDEN_URL = ROOM_URL + "/players/" + USER1_NAME + "/hidden"
@@ -130,7 +130,7 @@ class game_prepare:
             self._guess_gene()
             self._get_history()
             if self.turn == 1:
-                time.sleep(2)
+                time.sleep(5)
                 self._self_opponent_guess_check()
                 
                 
@@ -142,7 +142,7 @@ class game_prepare:
                     self._get_history()
                     
                 else:
-                    time.sleep(2)
+                    time.sleep(5)
                     self._self_opponent_guess_check()
             
 
@@ -246,6 +246,7 @@ class game_prepare:
                 self.pre_E = 1
         else:
             print("E")
+            print(check_guess_info1.json())
 
 
     def _winner(self) ->None:
@@ -405,7 +406,7 @@ class game_prepare:
         
         print("tries: ",self.tries)
         #print("tries: ",tries)
-        # self.done = []
+        self.done = []
         while(len(self.done) != self.total_possibilities):
             while(True):
                 self.guess_alg=self._get_random()
