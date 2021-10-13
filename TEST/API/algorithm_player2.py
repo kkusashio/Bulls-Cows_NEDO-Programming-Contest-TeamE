@@ -76,7 +76,7 @@ def detect_algorithm():#実際のアルゴリズム
                 break
         
         if(h == digits):
-            print("finnish",tries)
+            print("finish",tries)
             break
 
 
