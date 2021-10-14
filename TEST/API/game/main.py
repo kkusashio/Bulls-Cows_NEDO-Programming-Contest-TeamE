@@ -3,8 +3,102 @@ from pygame.locals import *
 import os
 import sys
 import algo
+import random
+
+path = os.getcwd()
+os.chdir(path+'/TEST/API/game')
+path = os.getcwd()
+print("AAAAAAAAAAAAAAAAAAAAAAA",path)
+#===============================アルゴリズム
+ans = []
+numberchoice = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+numberchoices = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
+attempts = 0
+gamewon=False
+history=[]
+digits=5
+gen_number=False
+input_number=[]
+Game_status =0
+def GenerateNum():
+    global ans
+    random.shuffle(numberchoice)
+    ans= numberchoice[:digits]
+    print(ans)
+
+def Hit_Blow_detector(answer,guess):
+    hits = 0
+    blows = 0
+    for i in guess:
+        if i in answer:
+            if(guess.index(i) == answer.index(i)):
+                hits += 1
+            else:
+                blows += 1
+    return [hits,blows]
+
+def TestFunc():
+    print ("Answer is", ans)
+
+def get_unique_list(seq):
+    seen = []
+    return [x for x in seq if x not in seen and not seen.append(x)]
+
+def Game(guess):
+    #input_number.clear()
+    global attempts
+    global ans
+    global Game_status
+    print("ans",ans)
+    print("digits",digits)
+    print("guess",guess)
+    blow=0
+    hit=0
+    choice = guess
+    valid_num=False
+    if(len(choice)!=digits):
+        Game_status =1
+    elif (len(choice)!=len(set(choice))):
+        Game_status=2
+    #ボタンだからほかの数字は入らない
+    #for i in range(len(choice)):
+    #    for j in range(len(numberchoices)):
+    #        if choice[i]==numberchoices[j]:
+    #            valid_input_char=True
+    #    if (len(choice)!=len(set(choice))):
+    #        invalid_input_same=True
+    #for i in range(digits):
+    #    guess.append(choice[i])
+    else:
+        attempts+=1
+        for i in range(digits):
+            if guess[i] == ans[i]:
+                hit+=1
+            for j in range(digits):
+                if(guess[i]==ans[j]):
+                    blow+=1
+        #check if game won
+        if(hit==5):
+            Game_status=4# game end
+        else:
+            blow=blow-hit
+            print("H:",hit,"B:",blow)
+            his=[hit,blow]
+            print("his",his)
+            history.append(his)
+            print("history",history)
+            return(history)
+            #print("推測: ",choice,", HIT: ", blow, ", BLOW: ",hit," , attempts: ", attempts)
+
+#Functions
+#GenerateNum()
+#TestFunc()
+#print(Game(["1","2","3","4","5"]))
+#print(Game(["6","7","8","9","0"]))
 
 
+
+#===================================================================
 SCREEN_RECT = Rect(0, 0, 640, 480)
 CS = 32
 SCREEN_NCOL = SCREEN_RECT.width//CS
@@ -12,6 +106,7 @@ SCREEN_NROW = SCREEN_RECT.height//CS
 SCREEN_CENTER_X = SCREEN_RECT.width//2//CS
 SCREEN_CENTER_Y = SCREEN_RECT.height//2//CS
 black=(0,0,0)
+red=(1,0,0)
 
 def load_image(filename):
     image = pygame.image.load(filename)
@@ -194,6 +289,8 @@ class MapchipData:
         self.mapchipData = {}
         self.startRow = 0
 
+
+##########################################################HBgame
 class Button():
     def __init__(self, x, y, image, scale):
         width = image.get_width()
@@ -261,10 +358,13 @@ class gamestate():
                     sys.exit()
                 if event.key == pygame.K_r:
                     self.state = 'HB_game'
+                    GenerateNum()
         #pygame.display.flip()
 
     def HB_game(self):
-        
+        global input_number
+        global attempts
+        global Game_status
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -273,15 +373,33 @@ class gamestate():
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-        myFont = pygame.font.SysFont("Times New Roman", 32)
         screen.blit(game_bg,(0,0))
-        input_number_display = myFont.render(' '.join(input_number[:5]),1, black)
+        myFont = pygame.font.SysFont("Times New Roman", 32)
+        input_number_display = myFont.render(' '.join(input_number[:digits]),1, black)#入力番号
+        guessing=input_number[:digits]
         screen.blit(input_number_display, (100, 150))
+        attempt=myFont.render("attempts: "+str(attempts),1,black)
+        screen.blit(attempt, (200,150))
+        anss=myFont.render("ans: "+str(ans),1,black)
+        screen.blit(anss,(0,0))
+        hiss=myFont.render("history: "+str(history),1,black)
+        screen.blit(hiss,(0,50))
+        if (Game_status==4):
+                congrats=myFont.render("CONGRATS", 1, red)
+                screen.blit(congrats,(100,100))
+        if(Game_status==2):
+            error_input_same=myFont.render("same_number: TRY AGAIN", 1, black)
+            screen.blit(error_input_same,(100,100))
+        if(Game_status==1):
+            error_input_char=myFont.render("invalid digits: TRY AGAIN", 1, black)
+            screen.blit(error_input_char,(100,100))
         if clear_button.draw():
-            input_number.clear()
+            input_number.clear()    
         if enter_button.draw():
-            algo.main()
-            input_number.clear()
+            Game(guessing)
+            print("attempts", attempts)
+            print(history)
+
         if button_1.draw():
             input_number.append("1")
         if button_2.draw():
@@ -355,41 +473,42 @@ background = pygame.image.load("background.png")
 game_bg=pygame.image.load("white.png")
 clear = pygame.image.load("button.png")
 enter = pygame.image.load("button.png")
-button1 = pygame.image.load("button/button1.jpg").convert_alpha()
-button2 = pygame.image.load("button/button2.jpg").convert_alpha()
-button3 = pygame.image.load("button/button3.jpg").convert_alpha()
-button4 = pygame.image.load("button/button4.jpg").convert_alpha()
-button5 = pygame.image.load("button/button5.jpg").convert_alpha()
-button6 = pygame.image.load("button/button6.jpg").convert_alpha()
-button7 = pygame.image.load("button/button7.jpg").convert_alpha()
-button8 = pygame.image.load("button/button8.jpg").convert_alpha()
-button9 = pygame.image.load("button/button9.jpg").convert_alpha()
-button0 = pygame.image.load("button/button0.jpg").convert_alpha()
-buttona = pygame.image.load("button/buttona.jpg").convert_alpha()
-buttonb = pygame.image.load("button/buttonb.jpg").convert_alpha()
-buttonc = pygame.image.load("button/buttonc.jpg").convert_alpha()
-buttond = pygame.image.load("button/buttond.jpg").convert_alpha()
-buttone = pygame.image.load("button/buttone.jpg").convert_alpha()
-buttonf = pygame.image.load("button/buttonf.jpg").convert_alpha()
+button1 = pygame.image.load("button/button1.png").convert_alpha()
+button2 = pygame.image.load("button/button2.png").convert_alpha()
+button3 = pygame.image.load("button/button3.png").convert_alpha()
+button4 = pygame.image.load("button/button4.png").convert_alpha()
+button5 = pygame.image.load("button/button5.png").convert_alpha()
+button6 = pygame.image.load("button/button6.png").convert_alpha()
+button7 = pygame.image.load("button/button7.png").convert_alpha()
+button8 = pygame.image.load("button/button8.png").convert_alpha()
+button9 = pygame.image.load("button/button9.png").convert_alpha()
+button0 = pygame.image.load("button/button0.png").convert_alpha()
+buttona = pygame.image.load("button/buttona.png").convert_alpha()
+buttonb = pygame.image.load("button/buttonb.png").convert_alpha()
+buttonc = pygame.image.load("button/buttonc.png").convert_alpha()
+buttond = pygame.image.load("button/buttond.png").convert_alpha()
+buttone = pygame.image.load("button/buttone.png").convert_alpha()
+buttonf = pygame.image.load("button/buttonf.png").convert_alpha()
 
-clear_button = Button(50,400, clear, 0.35)
-enter_button = Button(200, 400, enter, 0.35)
-button_1= Button(50, 200, button1,0.35)
-button_2= Button(100, 200, button2,0.35)
-button_3= Button(150,200, button3,0.35)
-button_4= Button(200,200, button4,0.35)
-button_5= Button(50,250, button5,0.35)
-button_6= Button(100,250, button6,0.35)
-button_7= Button(150,250, button7,0.35)
-button_8= Button(200,250, button8,0.35)
-button_9= Button(50,300, button9,0.35)
-button_0= Button(100,300, button0,0.35)
-button_a= Button(150,300, buttona,0.35)
-button_b= Button(200,300, buttonb,0.35)
-button_c= Button(50,350, buttonc,0.35)
-button_d= Button(100,350, buttond,0.35)
-button_e= Button(150,350, buttone,0.35)
-button_f= Button(200,350, buttonf,0.35)
+button_scale=0.1
+clear_button = Button(50,400, clear, button_scale)
+enter_button = Button(200, 400, enter, button_scale)
+button_1= Button(50, 200, button1,button_scale)
+button_2= Button(100, 200, button2,button_scale)
+button_3= Button(150,200, button3,button_scale)
+button_4= Button(200,200, button4,button_scale)
+button_5= Button(50,250, button5,button_scale)
+button_6= Button(100,250, button6,button_scale)
+button_7= Button(150,250, button7,button_scale)
+button_8= Button(200,250, button8,button_scale)
+button_9= Button(50,300, button9,button_scale)
+button_0= Button(100,300, button0,button_scale)
+button_a= Button(150,300, buttona,button_scale)
+button_b= Button(200,300, buttonb,button_scale)
+button_c= Button(50,350, buttonc,button_scale)
+button_d= Button(100,350, buttond,button_scale)
+button_e= Button(150,350, buttone,button_scale)
+button_f= Button(200,350, buttonf,button_scale)
 
 input_number=[]
 #if __name__ == '__main__':
