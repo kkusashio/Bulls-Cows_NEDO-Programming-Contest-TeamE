@@ -505,7 +505,7 @@ class gamestate():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.state = 'intro'
+                self.state = 'shop'
         congrats=FontM.render("CONGRATS!!!", 1, red)
         h=0
         b=0
