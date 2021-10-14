@@ -5,6 +5,8 @@ import sys
 import algo
 import random
 
+LIFE=1000
+
 path = os.getcwd()
 os.chdir(path+'/TEST/API/game')
 path = os.getcwd()
@@ -384,22 +386,6 @@ class gamestate():
         screen.blit(anss,(0,0))
         hiss=myFont.render("history: "+str(history),1,black)
         screen.blit(hiss,(0,50))
-        if (Game_status==4):
-                congrats=myFont.render("CONGRATS", 1, red)
-                screen.blit(congrats,(100,100))
-        if(Game_status==2):
-            error_input_same=myFont.render("same_number: TRY AGAIN", 1, black)
-            screen.blit(error_input_same,(100,100))
-        if(Game_status==1):
-            error_input_char=myFont.render("invalid digits: TRY AGAIN", 1, black)
-            screen.blit(error_input_char,(100,100))
-        if clear_button.draw():
-            input_number.clear()    
-        if enter_button.draw():
-            Game(guessing)
-            print("attempts", attempts)
-            print(history)
-
         if button_1.draw():
             input_number.append("1")
         if button_2.draw():
@@ -433,8 +419,36 @@ class gamestate():
         if button_f.draw():
             input_number.append("f")
         
-        #screen.blit(menu_image,(0,0))
-        #screen.blit(background,(0,0))
+        if clear_button.draw():
+            input_number.clear()    
+        if enter_button.draw():
+            Game(guessing)
+            print("attempts", attempts)
+            print(history)
+            input_number.clear()
+        
+        if (Game_status==4):
+                screen.blit(game_bg,(0,0))
+                congrats=myFont.render("CONGRATS", 1, red)
+                h=0
+                b=0
+                if attempts!=0 or attempts!=1:
+                    for i in range(attempts-1):
+                        h= h+ history[i][0]
+                        b= b+ history[i][1]
+                h+=5
+                toatl_earned_h=myFont.render("TOTAL EARNED HIT COIN: "+str(h),1,black)
+                toatl_earned_b=myFont.render("TOTAL EARNED BLOW COIN: "+str(b),1,black)
+                screen.blit(toatl_earned_h,(100,200))
+                screen.blit(toatl_earned_b,(100,250))
+                screen.blit(congrats,(100,100))
+        if(Game_status==2):
+            error_input_same=myFont.render("same_number: TRY AGAIN", 1, black)
+            screen.blit(error_input_same,(100,100))
+        if(Game_status==1):
+            error_input_char=myFont.render("invalid digits: TRY AGAIN", 1, black)
+            screen.blit(error_input_char,(100,100))
+    
         pygame.display.flip()
 
     def state_manager(self):
@@ -471,8 +485,8 @@ ready_text = pygame.image.load("ready.png")
 menu_image = pygame.image.load("menu_image.png")
 background = pygame.image.load("background.png")
 game_bg=pygame.image.load("white.png")
-clear = pygame.image.load("button.png")
-enter = pygame.image.load("button.png")
+clear = pygame.image.load("clear.png")
+enter = pygame.image.load("enter.png")
 button1 = pygame.image.load("button/button1.png").convert_alpha()
 button2 = pygame.image.load("button/button2.png").convert_alpha()
 button3 = pygame.image.load("button/button3.png").convert_alpha()
@@ -491,8 +505,9 @@ buttone = pygame.image.load("button/buttone.png").convert_alpha()
 buttonf = pygame.image.load("button/buttonf.png").convert_alpha()
 
 button_scale=0.1
-clear_button = Button(50,400, clear, button_scale)
-enter_button = Button(200, 400, enter, button_scale)
+button_scale2=0.05
+clear_button = Button(50,400, clear, button_scale2)
+enter_button = Button(200, 400, enter, button_scale2)
 button_1= Button(50, 200, button1,button_scale)
 button_2= Button(100, 200, button2,button_scale)
 button_3= Button(150,200, button3,button_scale)
