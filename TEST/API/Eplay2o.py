@@ -4,12 +4,13 @@ from typing import List,Tuple,Optional
 import json
 import random
 import math
+from numpy import number
 import requests
 from datetime import datetime
 import time
 import threading
-from aplayer1cb import ROOM_ID
 from scipy.special import perm
+from Eplay import ROOM_ID
 
 import argparse
 
@@ -24,7 +25,7 @@ USER1_ID = 'f30491d7-d862-4535-beab-077d682cb31f'
 USER2_NAME = 'E2'
 USER2_ID ='46711285-133d-40b6-93ae-e93d9404fb43'
 URL = "https://damp-earth-70561.herokuapp.com"
-# ROOM_ID = 5009
+# ROOM_ID = 5010
 ROOM_URL = URL + "/rooms/" + str(ROOM_ID)
 ENTER_URL = URL + "/rooms"
 HIDDEN_URL = ROOM_URL + "/players/" + USER2_NAME + "/hidden"
@@ -63,7 +64,7 @@ class game_prepare:
         self.hid = 0
         self.turn = 0
         self.pre_h = 0
-        self.pre_E = 0
+        self.pre_E2 = 0
         self.op_pre = 0
         self.digits=5 #桁数
         self.numbers=16 #選択肢
@@ -73,8 +74,7 @@ class game_prepare:
         self.guessed_numbers = [] #過去に予想したもの
         self.total_possibilities = math.factorial(self.numbers)/math.factorial(self.numbers-self.digits) #可能性の総数
         self.ans=[] #正解
-        self.number_tries = 0
-
+        
         self.numbers_of_tries=0
         self.guess_al=[] #そのトライでの予測
         self.h_temp = 0
@@ -93,46 +93,22 @@ class game_prepare:
         self.h_history: List[int] = [0]
         self.b_history: List[int] = [0]
         self.history: Tuple[List[int],List[int],List[int]] = [self.g_history,self.h_history,self.b_history]
+        # self.g_history: List[int] = self.history[0]
+        # self.h_history: List[int] = self.history[1]
+        # self.b_history: List[int] = self.history[2]
+        # self.history: Tuple[List[int],List[int],List[int]] = [[],[],[]]
         self.secret = 0
         self.guess = 0
 
-        # if guess is not None:
-        #     self.guess =guess
-        # else:
-        #     self.guess = self._define_answer()
 
     def run(self) ->Tuple[List[int],List[int],List[int]]:
         
         self._start_game_auto()
         while self._winner() != 1:
             self._play_contine()
-            # if self._winner() == 1:
-            #     print("winner generated")
-            #     break
-            # else:
-            # # time.sleep(10)
-            #     return self.history
         print("Winner generated")
             
             
-        
-
-    # def run(self,mode) ->Tuple[int,Tuple[List[int],List[int],List[int]]]:
-    #     """数当てゲームを実行するランナー
-        
-    #     :param str mode: ゲームの実行モード("manual", "linear", "binary")
-    #     :rtype: Tuple[int,List[int]]
-    #     :return: 回答回数,回答履歴
-    #     """
-    #     if mode == "linear":
-    #         self._play_game_auto_rand()
-    #     # elif mode == "binary":
-    #     #     self._play_game_auto_binary()
-    #     else:
-    #         self._play_game_manual()
-    #     self._show_result()
-    #     return self._get_history()
-    
     def _play_contine(self) -> None:
         time.sleep(2)
         timer.cancel()
@@ -145,7 +121,7 @@ class game_prepare:
                 
                 
             else:
-                if self.pre_h == 1 and self.pre_E == -1:
+                if self.pre_h == 1 and self.pre_E2 == -1:
                     # time.sleep(10)
                     # timer.cancel()
                     self._guess_gene()
@@ -155,10 +131,6 @@ class game_prepare:
                     time.sleep(5)
                     self._self_opponent_guess_check()
             
-
-
-
-
 
     def _start_game_auto(self)->None:
         self._pre_room()
@@ -180,22 +152,10 @@ class game_prepare:
                     self._guess_gene()
                     self._get_history()
                     self._self_opponent_hidden_check()
-                    # if self.pre_h == 1 and self.pre_E == 1:
-                    #     time.sleep(10)
-                    #     timer.cancel()
-                    # else:
-                    #     self._self_opponent_hidden_check()
-                    
                 elif self.hid == 2:
                     self._guess_gene()
                     self._get_history()
                     self._self_opponent_guess_check()
-                    # if self.pre_E == 1:
-                    #     time.sleep(10)
-                    #     timer.cancel()
-                    # else:
-                    #     self._self_opponent_guess_check()
-                        
                 else:
                     print("error in guess input")
                     
@@ -206,9 +166,6 @@ class game_prepare:
             print("error in entering room")
             
     
-
-
-    
     def _self_opponent_enter_check(self):
         check_enter_url = ROOM_URL
         check_enter_info = session.get(check_enter_url)
@@ -218,6 +175,7 @@ class game_prepare:
         else:
             self.pre_e = 0
 
+
     def _self_opponent_hidden_check(self):
         check_hidden_url  = HIDDEN_URL
         headers = {"Content-Type":"application/json"}
@@ -225,9 +183,9 @@ class game_prepare:
             "player_id": USER2_ID,
             "hidden_number":  self.secret
         }
-        # check_hidden_info = session.get(check_hidden_url)
+        
         check_hidden_info = session.post(check_hidden_url, headers=headers, json=secret_data1)
-        # print(check_hidden_info.text)
+        
         if check_hidden_info.status_code == 400:
             if check_hidden_info.json()['detail'] == 'you can not select hidden':
                 self.pre_h = 1
@@ -240,6 +198,7 @@ class game_prepare:
             else:
                 print("33")
 
+
     def _self_opponent_guess_check(self):
         headers = {"Content-Type":"application/json"}
         check_guess_url = GUESS_URL
@@ -250,12 +209,12 @@ class game_prepare:
         check_guess_info1 = session.post(check_guess_url,headers=headers,json=guess_data1)
         check_guess_info2 = json.loads(check_guess_info1.text)
         if check_guess_info1.status_code == 400 and check_guess_info1.json()["detail"] == 'opponent turn':
-                self.pre_E = -1
+                self.pre_E2 = -1
             
         elif check_guess_info1.status_code == 200 and check_guess_info2["now_player"] != 'E2':
-                self.pre_E = 1
+                self.pre_E2 = 1
         else:
-            print("E2")
+            print("E")
             print(check_guess_info1.json())
 
 
@@ -296,7 +255,6 @@ class game_prepare:
                 room_id = input("You cannot enter this room, please change another room ->")
         else:
             self.order = -2
-            # room_id = input("Enter room {} failed, please try again, or change room id",room_id)
             print("Enter room {} failed, please try again, or change room id",room_id)
         
     
@@ -310,7 +268,6 @@ class game_prepare:
         }
         enter_room = session.post(enter_url,headers=headers,json=post_data1)
         enter_info = session.get(enter_url + '/' + str(room_id))
-        # room_check = enter_info.json()
         room_check = json.loads(enter_info.text)
         print(room_check)
         if enter_room.status_code == 200 or enter_room.status_code == 400:
@@ -348,8 +305,6 @@ class game_prepare:
             "hidden_number": self.secret #args.ans
         }
         hidden_post = session.post(hidden_url,headers=headers,json=secret_data1)
-        # print(hidden_post.text)
-        # hidden_gene_info = hidden_post.json()
         hidden_gene_info = json.loads(hidden_post.text)
         if hidden_post.status_code == 200 :
             if hidden_gene_info['selecting'] == 'True':
@@ -380,20 +335,18 @@ class game_prepare:
     # HB=self.history() #[[1,[12345,1,0]],[2,[adf23,0,3]],[3,[...]]] 3次元配列
         his_url = HISTORY_URL
         his_info = session.get(his_url)
-        # his_get = his_info.json()
         his_gene_hb = json.loads(his_info.text)
-        # hdx = len(self.history[1])
-        if his_gene_hb['table'][-1]['guess'] == self.guess_al:
-            H = his_gene_hb['table'][-1]['hit']
-            print("getH: ",H)
-            # bdx = len(self.history[2])
-            B = his_gene_hb['table'][-1]['blow']
-            print("getB: ",B)
-            self.tries=[-1][0]
-            return([H,B])
-        else:
-            print("delay happened in guess post")
-# get_HB()
+        # if his_gene_hb['table'][-1]['guess'] == self.guess_al:
+        H = his_gene_hb['table'][-1]['hit']
+        print("getH: ",H)
+        # bdx = len(self.history[2])
+        B = his_gene_hb['table'][-1]['blow']
+        print("getB: ",B)
+        # self.tries=[-1][0]
+        return([H,B])
+        # else:
+        #     print("delay happened in guess post of E2")
+
 
     def _HBidentify(self,answer,guess): #HBの計算
         hits = 0
@@ -407,248 +360,92 @@ class game_prepare:
         return [hits,blows]
 
     def _get_random(self): #ランダムで桁数の数字を出力
-        # guess = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
-        # #guess = ['0','1','2','3','4','5','6','7','8','9']#10進数の場合
-        # random.shuffle(guess)
-        # self.guess_alg = guess[:self.digits]
-        # return self.guess_alg
-        # random.shuffle(self.gu_re)
         self.guess_al = random.sample(self.gu_re,self.digits)
         return self.guess_al
 
     def _gen_answer(self):#正解のリストを生成
-        # self.ans = self._get_random()
-        # print("answer: ",self.ans)
-        # return self.ans
         ans_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
         self.ans = random.sample(ans_array,self.digits)
         print("answer: ",self.ans)
         return self.ans
 
+
+    
     def _detect_algorithm(self):#実際のアルゴリズム
-        self.tries=self.numbers_of_tries
+        self.tries = self.numbers_of_tries
         
         print("tries: ",self.tries)
-        nu_leave=len(self.gu_re)
-        if nu_leave-self.digits>0:
-            self.total_possibilities = math.factorial(nu_leave)/math.factorial(nu_leave-self.digits)
-            # if self.return_guess == 0:
-            #     self.total_possibilities = math.factorial(nu_leave)/math.factorial(nu_leave-self.digits)
-            # elif self.return_guess == 1 or 2:
-            #     # hh=[self.h_temp,1][1>self.h_temp]
-            #     # bb=[self.b_temp,1][1>self.b_temp]
-            #     hh=self.h_temp
-            #     bb=self.b_temp
-            #     self.total_possibilities = (perm(self.digits,hh+bb)/perm(hh+bb,hh+bb))*perm(self.digits-(hh+bb),[hh+bb,self.digits-(hh+bb)][(hh+bb)>(self.digits-(hh+bb))])*perm(nu_leave-self.digits,self.digits-(hh+bb))
-        else:
-            self.total_possibilities = math.factorial(nu_leave)/math.factorial(self.digits)
+        #print("tries: ",tries)
+        self.done = []
         while(len(self.done) != self.total_possibilities):
             while(True):
-                self.guess_al=self._get_random()
-                if(self.guess_al not in self.done):
-                    self.done.append(self.guess_al)
+                self.guess_alg=self._get_random()
+                if(self.guess_alg not in self.done):
+                    self.done.append(self.guess_alg)
                     break
             if(self.tries>2):
                 for j in range(self.tries-1):
-                    h,b = self._HBidentify(self.guess_al,self.guessed_numbers[j])
-                    if(h != self.hits[[len(self.hits)-1,j][j<len(self.hits)-1]] or b != self.blows[[len(self.blows)-1,j][j<len(self.blows)-1]]):#もう同じ組み合わせがあるかどうか
+                    h,b = self._HBidentify(self.guess_alg,self.guessed_numbers[j])
+                    if(h != self.hits[j] or b != self.blows[j]):#もう同じ組み合わせがあるかどうか
                         break
-                # else:
-                #     self.guessed_numbers.append(self.guess_al)
-                #     break
+                else:
+                    self.guessed_numbers.append(self.guess_alg)
+                    break
             else:#chance=0
-                self.guessed_numbers.append(self.guess_al)
-                break 
+                self.guessed_numbers.append(self.guess_alg)
+                break
         else:
             print("error")
             
         print("checked",len(self.done))
-        print("guess: ",self.guess_al)
-
-
+        print("guess: ",self.guess_alg)
+        
         while(True):
-                # self.guess_al=self._get_random()
+            #h,b=HBidentify(ans,guess)
             h,b=self._get_HB()
             print(h,"H",b,"B")
-            # h = (int(input("Hits: ")))
-            # b = (int(input("Blows: ")))
+            # print("Guessed numbers:",len(self.guessed_numbers))
+            #h = (int(input("Hits: ")))
+            #b = (int(input("Blows: ")))
             if(h + b <= self.digits):
-                if h == 0 and b == 0:
-                    if self.return_guess == 0:
-                        self.return_guess = 0
-                        self.gu_re = list(set(self.gu_re).difference(set(self.guess_al)))
-                        self.guess_al=self._get_random()
-                        # self.guess_al = random.sample(self.gu_re,self.digits)
-                        self.temp_guess = self.guess_al
-                        break
-                    elif self.return_guess == 1:
-                        self.return_guess = 0
-                        # self.gu_re = [i for i in self.gu_re if i not in self.temp_guess]
-                        self.gu_re = list(set(self.gu_re).difference(set(self.guess_al)))
-                        ex_remove= set(self.temp_guess).difference(self.guess_al)
-                        self.guess_al = list(set(random.sample(self.gu_re ,self.digits-len(ex_remove))) | set(ex_remove) )
-                        # if len(self.guess_al) !=5 or self.guess_al == self.temp_guess:
-                        #     self.guess_al=random.sample(self.gu_re,self.digits)
-                        # else:
-                        #     print(self.guess_al)
-                        # self.guess_al = random.sample(self.gu_re ,self.digits) 
-                        self.temp_guess = self.guess_al
-                        # self.gu_re = list(set(self.gu_re).difference(set(self.guess_al)))
-                        # self.guess_al = random.sample([i for i in self.gu_re if i not in self.temp_guess],self.digits) 
-                        # self.gu_re = self.gu_re.remove(self.guess_al)
-                        break
-                    elif self.return_guess == 2:
-                        self.and_guess = 0
-                        self.gu_re = list(set(self.gu_re).difference(set(self.guess_al)))
-                        ex_remove= set(self.temp_guess).difference(self.guess_al)
-                        self.guess_al = list(set(random.sample(self.gu_re ,self.digits-len(ex_remove))) | set(ex_remove) )
-                        # if len(self.guess_al) !=5 or self.guess_al == self.temp_guess:
-                        #     self.guess_al=random.sample(self.gu_re,self.digits)
-                        # else:
-                        #     print(self.guess_al)
-                        # self.temp_guess = self.guess_al
-                    else:
-                        print("error happen in cross array calc of hb=0")
-
-                elif h + b <3:
-                    if self.return_guess == 0:
-                        # self.h_temp = h
-                        # self.b_temp = b
-                        self.return_guess = 1
-                        diff=set(self.guess_al).difference(set(self.temp_guess))
-                        self.guess_al = list(set(random.sample(self.gu_re ,self.digits-len(diff))) | set(diff) )
-                        # if len(self.guess_al) !=5 or self.guess_al == self.temp_guess:
-                        #     self.guess_al=random.sample(self.gu_re,self.digits)
-                        # else:
-                        #     print(self.guess_al)
-                        # self.guess_al = list(set(self.guess_al).difference(set(self.temp_guess)) | set(random.sample(self.gu_re,self.digits-(h+b))))
-                        
-                        self.temp_guess = self.guess_al
-                        # self.gu_re = list(set(self.gu_re).difference(set(random.sample(self.temp_guess,h + b))))
-                        
-                    elif self.return_guess == 1:
-                        # if (self.h_temp == h and self.b_temp == b) or (self.h_temp + self.b_temp == h + b) and self.guess_al != self.temp_guess:
-                        #     self.guess_al = random.sample([x for x in self.gu_re if x not in set([i for i in self.temp_guess if i not in self.guess_al])],self.digits) 
-                        # else:
-                        #     self.guess_al = random.sample([x for x in self.gu_re if x not in set([i for i in self.temp_guess if i not in self.guess_al])],self.digits) 
-                        diff = set([i for i in self.temp_guess if i not in self.guess_al])
-                        self.guess_al = list(set(random.sample(self.gu_re ,self.digits-len(diff))) | set(diff) )
-
-                        if len(self.guess_al) !=5 or self.guess_al == self.temp_guess:
-                            self.guess_al=self._get_random()
-                        else:
-                            print(self.guess_al)
-                        self.h_temp = h
-                        self.b_temp = b
-                        self.return_guess = 1
-                        # self.cross_guess = [x for x in self.temp_guess if x in set(self.guess_al)] 
-                        # self.and_guess = list(set(self.temp_guess).union(set(self.guess_al)))
-                        self.temp_guess = self.guess_al
-                        # self.gu_re = list(set(self.gu_re).difference(set(self.and_guess)))
-                        # num=random.randrange(h+b)
-                        # self.guess_al = random.sample(list(set(random.sample(self.cross_guess,num)) | set(self.gu_re)),self.digits)
-                        break
-                    elif self.return_guess == 2:
-                        self.return_guess = 1
-                        diff=set(self.temp_guess).difference(set(self.guess_al))
-                        self.guess_al = list(set(diff)| set(random.sample(self.gu_re,self.digits-len(diff)))) 
-                        # if len(self.guess_al) !=5 or self.guess_al == self.temp_guess:
-                        #     self.guess_al=random.sample(self.gu_re,self.digits)
-                        # else:
-                        #     print(self.guess_al)
-                        # self.gu_re = list(set(self.gu_re) | set(self.temp_guess))
-                        self.temp_guess = self.guess_al
-                        
-                    else:
-                        print("error happened in hb<3")
-                # elif h + b >=3 and h+b <5:
-                    
-                #     if self.return_guess == 1:
-
-                #         self.return_guess = 2
-                #         self.h_temp = h
-                #         self.b_temp = b
-                        
-                #         ans_f = random.sample(self.temp_guess,h+b)
-                #         self.temp_array =[i for i in self.gu_re if i not in self.temp_guess]
-                #         print(self.temp_array)
-                #         # self.gu_re = self.gu_re.remove(random.sample(self.temp_ans,self.digits-(h+b)))
-                #         self.guess_al = list(set(ans_f) | set(random.sample(self.temp_array,self.digits-len(ans_f))))
-                #         self.temp_guess = self.guess_al
-                #         break
-                #     # elif self.return_guess == 2:
-                #     #     self.return_guess = 2
-                #     #     if (self.h_temp == h and self.b_temp == b) or (self.h_temp + self.b_temp == h + b):
-                #     #         tem_c=set([i for i in self.temp_guess if i  in self.guess_al])
-                #     #         self.guess_al = list(set(tem_c) | random.sample(set(self.gu_re).difference(set(self.guess_al)),self.digits-len(tem_c))) 
-                #     #         self.h_temp = h
-                #     #         self.b_temp = b
-                #     #         self.temp_guess = self.guess_al
-                #     #         # self.gu_re = [x for x in self.gu_re if x not in set([i for i in self.temp_guess if i not in self.guess_al])] 
-                #     #     else:
-                #     #         self.h_temp = h
-                #     #         self.b_temp = b
-                #     #         nu_ll=len([i for i in self.gu_re if i not in self.temp_guess])
-                #     #     # [self.digits-nu_ll,nu_ll][nu_ll>(self.digits-nu_ll)]
-                #     #         self.guess_al =random.sample(list(set([i for i in self.gu_re if i not in self.temp_guess]) | set(random.sample(self.guess_al,self.digits-nu_ll))),self.digits)
-                #     #         self.gu_re = list(set(self.gu_re) | set(self.guess_al))
-                #     #         self.temp_guess = self.guess_al
-                #     #     break
-                #     else:
-                #         print("error in hb>3")
-                elif (h+b) == 5 and h<5:
-                    self.gu_re =self.guess_al
-                    self.guess_al=self._get_random()
-                    # self._guess_in_5()
-                    break
-                else:
-                    print("aaa")
                 self.hits.append(h)
                 self.blows.append(b)
+                print()
                 break
-            if(h == self.digits):
-                print("finish",self.tries)
-                break
+        
+        if(h == self.digits):
+            print("finnish",self.tries)
+            
+            
+
+
 
 
 
     def _guess_gene(self) ->None:
         guess_url = GUESS_URL
         headers = {"Content-Type":"application/json"}
-        # while self.hit_num <5:
-        #guess = random.sample(numberchoice,5)
         self.numbers_of_tries+=1
-        if self.numbers_of_tries == 1:
-            self.guess="".join(self._get_random())
-            print(self.guess)
+        # if self.numbers_of_tries == 1:
+            
+        #     self.guess = "".join(self._get_random())
+        #     print(self.guess)
         
-        else:
-            self._detect_algorithm()
-            # guess_al = self.guess_al
-            self.guess = "".join(self.guess_al)
-        his_url = HISTORY_URL
-        his_info = session.get(his_url)
-        # his_get = his_info.json()
-        his_get = json.loads(his_info.text)
-        while his_get['table'][-1]['guess']==self.guess:
-            self.numbers_of_tries-=1
-            self._detect_algorithm()
-            # guess_al = self.guess_al
-            self.guess = "".join(self.guess_al)
+        # else:
+        self._detect_algorithm()
+        self.guess = "".join(self.guess_al)
         guess_data1 ={
             "player_id": USER2_ID,
             "guess":  self.guess#args.ans
         }
         guess_post1 = session.post(guess_url,headers=headers,json=guess_data1)
-        # guess_gene_info = guess_post1.json()
         guess_gene_info = json.loads(guess_post1.text)
-        # print(guess_gene_info)
         if guess_post1.status_code == 200 and guess_gene_info['now_player'] != 'E2':
                 self.turn = -1
                 if guess_gene_info['guesses'][-1] == self.guess:
                     self.history[0].append(self.guess)
                 else:
-                    print("guess enter errorE2")
+                    print("guess enter errorE")
                 
         elif guess_post1.status_code == 400 and guess_gene_info['detail'] == 'opponent turn':
                 self.turn = 1
@@ -661,12 +458,9 @@ class game_prepare:
     def _get_history(self) -> Tuple[int,Tuple[List[int],List[int],List[int]]]:
         his_url = HISTORY_URL
         his_info = session.get(his_url)
-        # his_get = his_info.json()
         his_get = json.loads(his_info.text)
         if his_info.status_code == 200:
             print(his_info.json())
-            # if his_info['winner'] is not None:
-            # if his_get['table'][-1]['guess'] == self.guess:
             self.stage +=1
             self.hit_num = his_get['table'][-1]['hit']
             self.blow_num = his_get['table'][-1]['blow']
@@ -675,10 +469,6 @@ class game_prepare:
             self.history[2].append(self.blow_num)
             print(self.history[2])
             return self.stage, self.history
-            # else:
-            #     print("History unmatch, please try again")
-            # else:
-            #     print("Winner has be generated, Congratulations!!{}!!, you will for {} times game".format(his_info['winner'],his_info['game_end_count']))
         else:
             print("Get history failed, please try again")
 
@@ -698,15 +488,9 @@ def get_parser() ->argparse.Namespace:
     parser.add_argument('--blow_num',  default=0)
     parser.add_argument('--max_stage', default=5)
     parser.add_argument("--guess")
-    # parser.add_argument('--mode', default="manual")
     args=parser.parse_args()
     return args
 
-
-# def timer(n):
-#     while True:
-#         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-#         time.sleep(n)
 
 def fun_timer():
     global timer
@@ -725,10 +509,6 @@ def main() ->None:
     # mode = args.mode
     timer = threading.Timer(2,fun_timer)
     timer.start()
-
-
-    # runner = game_prepare._play_game_auto()
-    # print(args.ans)
     if args.guess is not None:
         guess = int(args.guess)
         runner =game_prepare(hit_num=hit_num,blow_num=blow_num,max_stage=max_stage,guess=guess)
@@ -738,5 +518,3 @@ def main() ->None:
 
 if __name__ == '__main__':
     main()
-
-
