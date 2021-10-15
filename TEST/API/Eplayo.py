@@ -24,7 +24,7 @@ USER1_ID = 'f30491d7-d862-4535-beab-077d682cb31f'
 USER2_NAME = 'E2'
 USER2_ID ='46711285-133d-40b6-93ae-e93d9404fb43'
 URL = "https://damp-earth-70561.herokuapp.com"
-ROOM_ID = 5137
+ROOM_ID = 5145
 ROOM_URL = URL + "/rooms/" + str(ROOM_ID)
 ENTER_URL = URL + "/rooms"
 HIDDEN_URL = ROOM_URL + "/players/" + USER1_NAME + "/hidden"
@@ -471,8 +471,13 @@ class game_prepare:
             print(his_info.json())
             self.stage +=1
             if his_get['table'] == None:
-                self._guess_gene()
                 time.sleep(5)
+                timer.cancel()
+                self._guess_gene()
+            elif his_get['table'] == []:
+                time.sleep(5)
+                timer.cancel()
+                self._guess_gene()
             else:
                 self.hit_num = his_get['table'][-1]['hit']
                 self.blow_num = his_get['table'][-1]['blow']
