@@ -24,7 +24,7 @@ USER1_ID = 'f30491d7-d862-4535-beab-077d682cb31f'
 USER2_NAME = 'E2'
 USER2_ID ='46711285-133d-40b6-93ae-e93d9404fb43'
 URL = "https://damp-earth-70561.herokuapp.com"
-ROOM_ID = 5101
+ROOM_ID = 5105
 ROOM_URL = URL + "/rooms/" + str(ROOM_ID)
 ENTER_URL = URL + "/rooms"
 HIDDEN_URL = ROOM_URL + "/players/" + USER1_NAME + "/hidden"
@@ -85,8 +85,8 @@ class game_prepare:
         self.temp_array = []
         # self.temp_ans = []
         self.done = []
-        guess_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
-        self.gu_re=guess_array
+        self.guess_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
+        self.gu_re=self.guess_array
         
         self.g_history: List[int] = [00000]
         self.h_history: List[int] = [0]
@@ -297,7 +297,7 @@ class game_prepare:
     def _hidden_gene(self) -> int:
         hidden_url = HIDDEN_URL
         headers = {"Content-Type":"application/json"}
-        secret = random.sample(numberchoice,5)
+        secret = random.sample(self.guess_array,5)
         self.secret = "".join(secret)
         secret_data1 ={
             "player_id": USER1_ID,
@@ -336,10 +336,10 @@ class game_prepare:
         his_info = session.get(his_url)
         his_gene_hb = json.loads(his_info.text)
         # if his_gene_hb['table'][-1]['guess'] == self.guess_al:
-        H = his_gene_hb['table'][-1]['hit']
+        H = self.history[1][-1]
         print("getH: ",H)
         # bdx = len(self.history[2])
-        B = his_gene_hb['table'][-1]['blow']
+        B = self.history[2][-1]
         print("getB: ",B)
         # self.tries=[-1][0]
         return([H,B])
@@ -431,8 +431,9 @@ class game_prepare:
         #     print(self.guess)
         
         # else:
-        self._detect_algorithm()
-        self.guess = "".join(self.guess_al)
+        guess=random.sample(self.guess_array,5)
+        # self._detect_algorithm()
+        self.guess = "".join(guess)
         
         guess_data1 ={
             "player_id": USER1_ID,

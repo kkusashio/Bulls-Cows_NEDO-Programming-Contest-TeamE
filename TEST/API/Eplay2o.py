@@ -10,7 +10,7 @@ from datetime import datetime
 import time
 import threading
 from scipy.special import perm
-from Eplay import ROOM_ID
+from Eplayo import ROOM_ID
 
 import argparse
 
@@ -86,8 +86,8 @@ class game_prepare:
         self.temp_array = []
         # self.temp_ans = []
         self.done = []
-        guess_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
-        self.gu_re=guess_array
+        self.guess_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
+        self.gu_re=self.guess_array
         
         self.g_history: List[int] = [00000]
         self.h_history: List[int] = [0]
@@ -298,7 +298,7 @@ class game_prepare:
     def _hidden_gene(self) -> int:
         hidden_url = HIDDEN_URL
         headers = {"Content-Type":"application/json"}
-        secret = random.sample(numberchoice,5)
+        secret = random.sample(self.guess_array,5)
         self.secret = "".join(secret)
         secret_data1 ={
             "player_id": USER2_ID,
@@ -333,14 +333,14 @@ class game_prepare:
     def _get_HB(self):
     
     # HB=self.history() #[[1,[12345,1,0]],[2,[adf23,0,3]],[3,[...]]] 3次元配列
-        his_url = HISTORY_URL
-        his_info = session.get(his_url)
-        his_gene_hb = json.loads(his_info.text)
+        # his_url = HISTORY_URL
+        # his_info = session.get(his_url)
+        # his_gene_hb = json.loads(his_info.text)
         # if his_gene_hb['table'][-1]['guess'] == self.guess_al:
-        H = his_gene_hb['table'][-1]['hit']
+        H = self.history[1][-1]
         print("getH: ",H)
         # bdx = len(self.history[2])
-        B = his_gene_hb['table'][-1]['blow']
+        B = self.history[2][-1]
         print("getB: ",B)
         # self.tries=[-1][0]
         return([H,B])
@@ -432,8 +432,9 @@ class game_prepare:
         #     print(self.guess)
         
         # else:
-        self._detect_algorithm()
-        self.guess = "".join(self.guess_al)
+        # self._detect_algorithm()
+        guess=random.sample(self.guess_array,5)
+        self.guess = "".join(guess)
         guess_data1 ={
             "player_id": USER2_ID,
             "guess":  self.guess#args.ans
