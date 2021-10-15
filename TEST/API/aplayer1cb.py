@@ -24,7 +24,7 @@ USER1_ID = 'f30491d7-d862-4535-beab-077d682cb31f'
 USER2_NAME = 'E2'
 USER2_ID ='46711285-133d-40b6-93ae-e93d9404fb43'
 URL = "https://damp-earth-70561.herokuapp.com"
-ROOM_ID = 5222
+ROOM_ID = 5100
 ROOM_URL = URL + "/rooms/" + str(ROOM_ID)
 ENTER_URL = URL + "/rooms"
 HIDDEN_URL = ROOM_URL + "/players/" + USER1_NAME + "/hidden"
@@ -683,7 +683,7 @@ class game_prepare:
         his_info = session.get(his_url)
         # his_get = his_info.json()
         his_get = json.loads(his_info.text)
-        while his_get['table'][-1]['guess']==self.guess:
+        while his_get['table'][-1]['guess']==self.guess_al:
             self.numbers_of_tries-=1
             self._detect_algorithm()
             # guess_al = self.guess_al
