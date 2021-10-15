@@ -152,14 +152,18 @@ class game_prepare:
                     time.sleep(10)
                     timer.cancel()
                     self._guess_gene()
-                    self._get_history()
+                    # self._get_history()
                     self._self_opponent_hidden_check()
+                    self._guess_gene()
+                    self._get_history()
                 elif self.hid == 2:
                     time.sleep(10)
                     timer.cancel()
                     self._guess_gene()
-                    self._get_history()
+                    # self._get_history()
                     self._self_opponent_guess_check()
+                    self._guess_gene()
+                    self._get_history()
                 else:
                     print("error in guess input")
                     
@@ -473,8 +477,13 @@ class game_prepare:
             print(his_info.json())
             self.stage +=1
             if his_get['table'] == None:
-                self._guess_gene()
                 time.sleep(5)
+                timer.cancel()
+                self._guess_gene()
+            elif his_get['table'] == []:
+                time.sleep(5)
+                timer.cancel()
+                self._guess_gene()
             else:
                 
                 self.hit_num = his_get['table'][-1]['hit']
