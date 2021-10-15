@@ -5,13 +5,26 @@ import sys
 import algo
 import random
 
-LIFE=1000
-
+LIFE=100
 path = os.getcwd()
 os.chdir(path+'/TEST/API/game')
 path = os.getcwd()
-print("AAAAAAAAAAAAAAAAAAAAAAA",path)
+#print("current font:",path)
+#font
+pygame.init()
+FontL = pygame.font.Font("myfont.ttf", 32)
+FontM = pygame.font.Font("myfont.ttf", 24)
+FontS = pygame.font.Font("myfont.ttf", 16)
+FontMini =pygame.font.Font("myfont.ttf", 8)
+black =(0,0,0)
+red=(200,0,0)
+green=(0,255,255)
+blue=(0,0,255)
+yellow=(0,255,255)
+attempted=[]
+
 #===============================アルゴリズム
+
 ans = []
 numberchoice = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
 numberchoices = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']
@@ -49,6 +62,7 @@ def get_unique_list(seq):
 def Game(guess):
     #input_number.clear()
     global attempts
+    global LIFE
     global ans
     global Game_status
     print("ans",ans)
@@ -72,7 +86,9 @@ def Game(guess):
     #for i in range(digits):
     #    guess.append(choice[i])
     else:
+        attempted.append(guess)
         attempts+=1
+        LIFE -= 1
         for i in range(digits):
             if guess[i] == ans[i]:
                 hit+=1
@@ -88,7 +104,6 @@ def Game(guess):
             his=[hit,blow]
             print("his",his)
             history.append(his)
-            print("history",history)
             return(history)
             #print("推測: ",choice,", HIT: ", blow, ", BLOW: ",hit," , attempts: ", attempts)
 
@@ -108,7 +123,6 @@ SCREEN_NROW = SCREEN_RECT.height//CS
 SCREEN_CENTER_X = SCREEN_RECT.width//2//CS
 SCREEN_CENTER_Y = SCREEN_RECT.height//2//CS
 black=(0,0,0)
-red=(1,0,0)
 
 def load_image(filename):
     image = pygame.image.load(filename)
@@ -152,9 +166,11 @@ class Player(pygame.sprite.Sprite):
         self.moving = False
         self.vx, self.vy = 0, 0
         self.px, self.py = 0, 0
+        self.movement=False
     def set_map(self, map_):
         self.map = map_
     def handle_keys(self):
+        global LIFE
         if self.moving:
             self.px += self.vx
             self.py += self.vy
@@ -171,21 +187,25 @@ class Player(pygame.sprite.Sprite):
                 if self.map.can_move_at(self.wx, self.wy + 1):
                     self.moving = True
                     self.vy = MOVE_VELOCITY
+                    LIFE -=1
             elif pressed_keys[K_LEFT]:
                 self.dir = DIR_LEFT
                 if self.map.can_move_at(self.wx - 1, self.wy):
                     self.moving = True
                     self.vx = -MOVE_VELOCITY
+                    LIFE -=1
             elif pressed_keys[K_RIGHT]:
                 self.dir = DIR_RIGHT
                 if self.map.can_move_at(self.wx + 1, self.wy):
                     self.moving = True
                     self.vx = MOVE_VELOCITY
+                    LIFE -=1
             elif pressed_keys[K_UP]:
                 self.dir = DIR_UP
                 if self.map.can_move_at(self.wx, self.wy - 1):
                     self.moving = True
                     self.vy = -MOVE_VELOCITY
+                    LIFE -=1
     def update(self):
         self.handle_keys()
         self.anim_count += 1
@@ -330,25 +350,23 @@ class gamestate():
                 self.state = 'main_game'
         #screen.blit(menu_image,(0,0))
         screen.blit(background,(0,0))
-        myFont = pygame.font.SysFont("Times New Roman", 32)
-        myFont2 = pygame.font.SysFont("Times New Roman", 16)
-        title = myFont.render("HIT AND BULL RPG",1, black)
-        instructions = myFont2.render("CLICK TO PLAY", 1, black)
-        screen.blit(title, (200, 150))
-        screen.blit(instructions, (250, 300))
+        title = FontM.render("WANDER in COMA",1, black)
+        instructions = FontS.render("CLICK to PLAY", 1, black)
+        screen.blit(title, (300, 250))
+        screen.blit(instructions, (350, 300))
         #screen.blit(ready_text,(screen_width/2,screen_height))
         pygame.display.flip()
     
     #methodに入れておく
     def main_game(self):
-        #for event in pygame.event.get():
-        #   if event.type == pygame.QUIT:
-        #        pygame.quit()
-        #screen.blit(background,(0,0))
+        if LIFE==0:
+            self.state = 'gameover'
         screen.fill((0, 255, 0))
         fieldMap.draw()
         group.update()
         group.draw(screen)
+        step_life = FontS.render(str(LIFE),1, red)
+        screen.blit(step_life, (320, 200))
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -364,6 +382,10 @@ class gamestate():
         #pygame.display.flip()
 
     def HB_game(self):
+        torn_paper= pygame.transform.scale(tornpaper,(640,480))
+        screen.blit(torn_paper,(0,0))
+        if LIFE==0:
+            self.state = 'gameover'
         global input_number
         global attempts
         global Game_status
@@ -375,17 +397,44 @@ class gamestate():
                 if event.key == K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-        screen.blit(game_bg,(0,0))
-        myFont = pygame.font.SysFont("Times New Roman", 32)
-        input_number_display = myFont.render(' '.join(input_number[:digits]),1, black)#入力番号
+        input_number_display = FontM.render(' '.join(input_number[:digits]),1, black)#入力番号
         guessing=input_number[:digits]
-        screen.blit(input_number_display, (100, 150))
-        attempt=myFont.render("attempts: "+str(attempts),1,black)
-        screen.blit(attempt, (200,150))
-        anss=myFont.render("ans: "+str(ans),1,black)
-        screen.blit(anss,(0,0))
-        hiss=myFont.render("history: "+str(history),1,black)
-        screen.blit(hiss,(0,50))
+        screen.blit(input_number_display, (70, 130))
+        attempt=FontS.render("attempts: "+str(attempts),1,black)
+        screen.blit(attempt, (400,50))
+        #anss=FontS.render("ans: "+str(ans),1,black)
+        #screen.blit(anss,(0,0))
+        #hits=[]
+        #print("history",history)
+        hiits=FontM.render("LIFE: "+str(LIFE),1,red)
+        screen.blit(hiits, (400,100))
+        hiits=FontMini.render("HITS",1,black)
+        screen.blit(hiits, (430,160))
+        bloows=FontMini.render("BLOWS",1,black)
+        screen.blit(bloows, (500,160))
+        if attempts>=2 and Game !=4:
+            for i in range(attempts):
+                attem=FontS.render(' '.join(attempted[-1-i]),1, black)
+                screen.blit(attem,(300,200+20*i))
+        elif attempts ==1:
+            attem=FontS.render(' '.join(attempted[0]),1, black)
+            screen.blit(attem,(300,200))
+        if attempts>=2 and Game !=4:
+            for i in range(attempts):
+                hitsss=str(history[-1-i][0])
+                lock=FontS.render(str(hitsss),1,black)
+                screen.blit(lock,(450,200+20*i))
+        elif attempts ==1:
+            hitss=FontS.render(str(history[0][0]),1,black)
+            screen.blit(hitss,(450,200))
+        if attempts>=2 and Game !=4:
+            for i in range(attempts):
+                blowsss=str(history[-1-i][1])
+                pock=FontS.render(str(blowsss),1,black)
+                screen.blit(pock,(500,200+20*i))
+        elif attempts ==1:
+            blowss=FontS.render(str(history[0][1]),1,black)
+            screen.blit(blowss,(500,200))
         if button_1.draw():
             input_number.append("1")
         if button_2.draw():
@@ -428,27 +477,64 @@ class gamestate():
             input_number.clear()
         
         if (Game_status==4):
-                screen.blit(game_bg,(0,0))
-                congrats=myFont.render("CONGRATS", 1, red)
-                h=0
-                b=0
-                if attempts!=0 or attempts!=1:
-                    for i in range(attempts-1):
-                        h= h+ history[i][0]
-                        b= b+ history[i][1]
-                h+=5
-                toatl_earned_h=myFont.render("TOTAL EARNED HIT COIN: "+str(h),1,black)
-                toatl_earned_b=myFont.render("TOTAL EARNED BLOW COIN: "+str(b),1,black)
-                screen.blit(toatl_earned_h,(100,200))
-                screen.blit(toatl_earned_b,(100,250))
-                screen.blit(congrats,(100,100))
+                self.state = 'result'
         if(Game_status==2):
-            error_input_same=myFont.render("same_number: TRY AGAIN", 1, black)
-            screen.blit(error_input_same,(100,100))
+            error_input_same=FontS.render("INPUT DUPLICATION", 1, red)
+            screen.blit(error_input_same,(50,100))
         if(Game_status==1):
-            error_input_char=myFont.render("invalid digits: TRY AGAIN", 1, black)
-            screen.blit(error_input_char,(100,100))
+            error_input_char=FontS.render("INVALID DIGITS", 1, red)
+            screen.blit(error_input_char,(50,100))
+        pygame.display.flip()
     
+    def gameover(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.state = 'intro'
+        game_over_rescale = pygame.transform.scale(game_over,(640, 480))
+        screen.blit(game_over_rescale,(0,0))
+        pygame.display.flip()
+
+    def result(self):
+        result_screen= pygame.transform.scale(result,(640,480))
+        screen.blit(result_screen,(0,0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.state = 'shop'
+        congrats=FontM.render("CONGRATS!!!", 1, red)
+        h=0
+        b=0
+        if attempts!=0 or attempts!=1:
+            for i in range(attempts-1):
+                h= h+ history[i][0]
+                b= b+ history[i][1]
+        h+=5
+        toatl_earned_h=FontM.render("TOTAL EARNED HIT COIN: "+str(h),1,black)
+        toatl_earned_b=FontM.render("TOTAL EARNED BLOW COIN: "+str(b),1,black)
+        screen.blit(toatl_earned_h,(20,200))
+        screen.blit(toatl_earned_b,(20,250))
+        screen.blit(congrats,(200,100))
+        if confirm_button.draw():
+            self.state = 'shop'
+        pygame.display.flip()
+
+    def shop(self):
+        shop_bg= pygame.transform.scale(itemshop,(640,480))
+        screen.blit(shop_bg,(0,0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.state = 'intro'
+
+        if confirm_button.draw():
+            self.state = 'main_game'
         pygame.display.flip()
 
     def state_manager(self):
@@ -458,7 +544,12 @@ class gamestate():
             self.main_game()
         if self.state == 'HB_game':
             self.HB_game()
-
+        if self.state =='gameover':
+            self.gameover()
+        if self.state =='result':
+            self.result()
+        if self.state == 'shop':
+            self.shop()
 #general setup
 pygame.init()
 clock = pygame.time.Clock()
@@ -485,8 +576,15 @@ ready_text = pygame.image.load("ready.png")
 menu_image = pygame.image.load("menu_image.png")
 background = pygame.image.load("background.png")
 game_bg=pygame.image.load("white.png")
+#poker=pygame.image.load("poker.png")
 clear = pygame.image.load("clear.png")
 enter = pygame.image.load("enter.png")
+game_over=pygame.image.load("gameover.jpg")
+black_p=pygame.image.load("black.png")
+tornpaper=pygame.image.load("tornpaper.png")
+result=pygame.image.load("result.png")
+itemshop=pygame.image.load("itemshop.png")
+confirm = pygame.image.load("confirm.png").convert_alpha()
 button1 = pygame.image.load("button/button1.png").convert_alpha()
 button2 = pygame.image.load("button/button2.png").convert_alpha()
 button3 = pygame.image.load("button/button3.png").convert_alpha()
@@ -506,6 +604,7 @@ buttonf = pygame.image.load("button/buttonf.png").convert_alpha()
 
 button_scale=0.1
 button_scale2=0.05
+confirm_button = Button(300,350, confirm, 0.25)
 clear_button = Button(50,400, clear, button_scale2)
 enter_button = Button(200, 400, enter, button_scale2)
 button_1= Button(50, 200, button1,button_scale)
