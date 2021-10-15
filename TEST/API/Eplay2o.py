@@ -10,7 +10,7 @@ from datetime import datetime
 import time
 import threading
 from scipy.special import perm
-from Eplay import ROOM_ID
+from Eplayo import ROOM_ID
 
 import argparse
 
@@ -77,6 +77,7 @@ class game_prepare:
         
         self.numbers_of_tries=0
         self.guess_al=[] #そのトライでの予測
+        self.guess_alg=[] #そのトライでの予測
         self.h_temp = 0
         self.b_temp = 0
         self.return_guess = 0 # 一回ランダムな数字を可能ナンバーに消して、実行できなくなると、また戻ります。
@@ -86,8 +87,8 @@ class game_prepare:
         self.temp_array = []
         # self.temp_ans = []
         self.done = []
-        guess_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
-        self.gu_re=guess_array
+        self.guess_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
+        self.gu_re=self.guess_array
         
         self.g_history: List[int] = [00000]
         self.h_history: List[int] = [0]
@@ -104,13 +105,14 @@ class game_prepare:
     def run(self) ->Tuple[List[int],List[int],List[int]]:
         
         self._start_game_auto()
-        while self._winner() != 1:
+        while self.hit_num !=5:
+        # while self._winner() != 1:
             self._play_contine()
         print("Winner generated")
             
             
     def _play_contine(self) -> None:
-        time.sleep(2)
+        time.sleep(5)
         timer.cancel()
         while True:
             self._guess_gene()
@@ -122,8 +124,8 @@ class game_prepare:
                 
             else:
                 if self.pre_h == 1 and self.pre_E2 == -1:
-                    # time.sleep(10)
-                    # timer.cancel()
+                    time.sleep(5)
+                    timer.cancel()
                     self._guess_gene()
                     self._get_history()
                     
@@ -137,7 +139,7 @@ class game_prepare:
         if self.order == 1:
             self._enter_room()
             if self.wait == 1:
-                time.sleep(2)
+                time.sleep(5)
                 self._self_opponent_enter_check()
                 if self.pre_e == 1:
                     timer.cancel()
@@ -147,12 +149,14 @@ class game_prepare:
             elif self.wait == 2:
                 self._hidden_gene()
                 if self.hid == 1:
-                    time.sleep(4)
+                    time.sleep(10)
                     timer.cancel()
                     self._guess_gene()
                     self._get_history()
                     self._self_opponent_hidden_check()
                 elif self.hid == 2:
+                    time.sleep(10)
+                    timer.cancel()
                     self._guess_gene()
                     self._get_history()
                     self._self_opponent_guess_check()
@@ -227,9 +231,10 @@ class game_prepare:
             return 0
 
 
-    def _pre_room(self,room_id:int = ROOM_ID) -> int:
+    def _pre_room(self,room_id:int=ROOM_ID) -> int:
         room_url = ROOM_URL
         room_info =session.get(room_url)
+        # room_id=ROOM_ID
         if room_info.status_code == 200 or room_info.status_code == 400:
             order_of_player = json.loads(room_info.text)
             if order_of_player['player1'] =='E2':
@@ -252,16 +257,17 @@ class game_prepare:
                     self.order = -1
             else:
                 self.order = -1
-                room_id = input("You cannot enter this room, please change another room ->")
+                # room_id = input("You cannot enter this room, please change another room ->")
         else:
             self.order = -2
             print("Enter room {} failed, please try again, or change room id",room_id)
         
     
 
-    def _enter_room(self,room_id:int = ROOM_ID) ->None:
+    def _enter_room(self,room_id:int=ROOM_ID) ->None:
         enter_url = ENTER_URL
         headers = {"Content-Type":"application/json"}
+        # room_id=ROOM_ID
         post_data1 = {
             "player_id": USER2_ID,
             "room_id": room_id
@@ -298,7 +304,7 @@ class game_prepare:
     def _hidden_gene(self) -> int:
         hidden_url = HIDDEN_URL
         headers = {"Content-Type":"application/json"}
-        secret = random.sample(numberchoice,5)
+        secret = random.sample(self.guess_array,5)
         self.secret = "".join(secret)
         secret_data1 ={
             "player_id": USER2_ID,
@@ -333,14 +339,14 @@ class game_prepare:
     def _get_HB(self):
     
     # HB=self.history() #[[1,[12345,1,0]],[2,[adf23,0,3]],[3,[...]]] 3次元配列
-        his_url = HISTORY_URL
-        his_info = session.get(his_url)
-        his_gene_hb = json.loads(his_info.text)
+        # his_url = HISTORY_URL
+        # his_info = session.get(his_url)
+        # his_gene_hb = json.loads(his_info.text)
         # if his_gene_hb['table'][-1]['guess'] == self.guess_al:
-        H = his_gene_hb['table'][-1]['hit']
+        H = self.history[1][-1]
         print("getH: ",H)
         # bdx = len(self.history[2])
-        B = his_gene_hb['table'][-1]['blow']
+        B = self.history[2][-1]
         print("getB: ",B)
         # self.tries=[-1][0]
         return([H,B])
@@ -361,7 +367,7 @@ class game_prepare:
 
     def _get_random(self): #ランダムで桁数の数字を出力
         self.guess_al = random.sample(self.gu_re,self.digits)
-        return self.guess_al
+        return self.guess_alg
 
     def _gen_answer(self):#正解のリストを生成
         ans_array = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']#16進数の場合
@@ -432,8 +438,12 @@ class game_prepare:
         #     print(self.guess)
         
         # else:
-        self._detect_algorithm()
-        self.guess = "".join(self.guess_al)
+        #     self._detect_algorithm()
+        #     guess=self.guess_alg
+        #     self.guess = "".join(guess)
+        guess=random.sample(self.guess_array,5)
+        self.guess = "".join(guess)
+            
         guess_data1 ={
             "player_id": USER2_ID,
             "guess":  self.guess#args.ans
@@ -462,12 +472,17 @@ class game_prepare:
         if his_info.status_code == 200:
             print(his_info.json())
             self.stage +=1
-            self.hit_num = his_get['table'][-1]['hit']
-            self.blow_num = his_get['table'][-1]['blow']
-            self.history[1].append(self.hit_num)
-            print(self.history[1])
-            self.history[2].append(self.blow_num)
-            print(self.history[2])
+            if his_get['table'] == None:
+                self._guess_gene()
+                time.sleep(5)
+            else:
+                
+                self.hit_num = his_get['table'][-1]['hit']
+                self.blow_num = his_get['table'][-1]['blow']
+                self.history[1].append(self.hit_num)
+                print(self.history[1])
+                self.history[2].append(self.blow_num)
+                print(self.history[2])
             return self.stage, self.history
         else:
             print("Get history failed, please try again")
@@ -507,6 +522,7 @@ def main() ->None:
     blow_num = int(args.blow_num)
     max_stage = int(args.max_stage)
     # mode = args.mode
+    
     timer = threading.Timer(2,fun_timer)
     timer.start()
     if args.guess is not None:
